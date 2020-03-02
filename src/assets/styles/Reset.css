@@ -1,0 +1,80 @@
+/* Reset.css */
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:active,
+a:hover {
+  outline: 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+img {
+  display: block;
+}
+
+/* ant-design */
+.ant-form-item {
+  margin-bottom: 10px;
+}
+.ant-drawer-mask,
+.ant-drawer-right .ant-drawer-content-wrapper {
+  height: calc(100vh - 50px);
+  top: 50px;
+}
+.ant-drawer-body {
+  padding: 15px;
+}
+.ant-drawer-body section {
+  border: 1px solid #e4e7ed;
+  min-height: 40px;
+  padding: 0 15px 5px;
+}
+.ant-drawer-body section + section {
+  margin-top: 15px;
+}
+.ant-drawer-body section h3 {
+  margin-top: -13px;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  background: #fff;
+  display: block;
+  width: 60px;
+  text-align: center;
+}
+button + button,
+.ant-select + .ant-select {
+  margin-left: 10px;
+}
+.ant-form-item {
+  margin-bottom: 0;
+}
+.ant-btn {
+  min-width: 100px;
+}
+.ant-btn-sm {
+  font-size: 12px;
+  min-width: 80px;
+}
+/* 分页居中 */
+.ant-pagination {
+  text-align: center;
+}
+.ant-spin-nested-loading > div > .ant-spin {
+  max-height: inherit;
+}
