@@ -10,6 +10,10 @@ body {
   overflow: hidden;
 }
 
+ul {
+  list-style: none;
+}
+
 a {
   text-decoration: none;
 }
@@ -77,4 +81,22 @@ button + button,
 }
 .ant-spin-nested-loading > div > .ant-spin {
   max-height: inherit;
+}
+/* Section */
+.common-drawer section {
+  border: 1px solid #e4e7ed;
+  min-height: 40px;
+  padding: 0 15px 5px;
+}
+.common-drawer section + section {
+  margin-top: 15px;
+}
+.common-drawer section h4 {
+  margin-top: -10px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  background: #fff;
+  display: block;
+  width: 60px;
+  text-align: center;
 }

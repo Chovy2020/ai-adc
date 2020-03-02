@@ -1,18 +1,21 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { BrowserRouter, Route, Switch, Redirect, Link } from 'react-router-dom'
-import { Icon } from 'antd'
+import { Icon, Spin } from 'antd'
 import { Header, Logo, Container, Menu, Main } from './style'
 import { changeMenu } from '@/utils/action'
 import { MENUS } from '@/utils/constant'
 
-// Router
-import HomePage from '@/pages'
+// ADC
+import Home from '@/pages'
+import Manual from '@/pages/Manual/Loadable'
+// Account
 import Page404 from '@/pages/Account/404'
 
 const routes = {
-  '/': HomePage,
-  '/adc': HomePage,
+  '/': Home,
+  '/adc': Home,
+  '/manual': Manual,
   '/*': Page404
 }
 
@@ -24,7 +27,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { activeMenu } = this.props
+    const { activeMenu, toolBoxLoading } = this.props
 
     return (
       <BrowserRouter>
@@ -51,11 +54,13 @@ class App extends React.Component {
             </ul>
           </Menu>
           <Main>
-            <Switch>
-              {Object.keys(routes).map((route, key) => generateRoute(route, key))}
-              <Route exact path='' component={HomePage} />
-              <Redirect form='/*' to='/404' />
-            </Switch>
+            <Spin spinning={toolBoxLoading} style={{ height: 'calc(100vh - 50px)' }}>
+              <Switch>
+                {Object.keys(routes).map((route, key) => generateRoute(route, key))}
+                <Route exact path='' component={Home} />
+                <Redirect form='/*' to='/404' />
+              </Switch>
+            </Spin>
           </Main>
         </Container>
       </BrowserRouter>

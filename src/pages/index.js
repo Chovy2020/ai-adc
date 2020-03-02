@@ -5,7 +5,7 @@ import { Card } from 'antd'
 import styled from 'styled-components'
 import Favicon from '@/assets/images/favicon.png'
 import { changeMenu } from '@/utils/action'
-// import { injectReducer } from '@/utils/store'
+import { MODULES } from '@/utils/constant'
 
 const StyleModules = styled.ul`
   list-style: none;
@@ -43,28 +43,6 @@ const StyleModules = styled.ul`
     }
   }
 `
-const MODULES = [
-  {
-    title: 'Manual Classification',
-    link: 'manual'
-  },
-  {
-    title: 'Defect Library',
-    link: 'library'
-  },
-  {
-    title: 'ADC Builder',
-    link: 'builder'
-  },
-  {
-    title: 'Reporting',
-    link: 'reporting'
-  },
-  {
-    title: 'Mgt & Config',
-    link: 'config'
-  }
-]
 
 class ADC extends React.Component {
   constructor(props) {
@@ -79,34 +57,22 @@ class ADC extends React.Component {
     this.props.changeMenu('adc')
   }
 
-  onButtonClick = () => {
-    let { num } = this.state
-    num += 1
-    this.setState({ num })
-  }
-
   render() {
-    // const { msg, num } = this.state
-
     return (
-      <div className='App'>
-        <StyleModules>
-          {MODULES.map(m => (
-            <li key={m.title}>
-              <Link to={m.link}>
-                <Card title={m.title}>
-                  <img src={Favicon} alt='' />
-                </Card>
-              </Link>
-            </li>
-          ))}
-        </StyleModules>
-      </div>
+      <StyleModules>
+        {MODULES.map(m => (
+          <li key={m.title}>
+            <Link to={m.link}>
+              <Card title={m.title}>
+                <img src={Favicon} alt='' />
+              </Card>
+            </Link>
+          </li>
+        ))}
+      </StyleModules>
     )
   }
 }
 
-// injectReducer('ADC', reducer)
-const mapStateToProps = state => ({ ...state.Init })
 const mapDispatchToProps = { changeMenu }
-export default connect(mapStateToProps, mapDispatchToProps)(ADC)
+export default connect(() => ({}), mapDispatchToProps)(ADC)

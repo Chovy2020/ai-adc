@@ -1,0 +1,433 @@
+import React from 'react'
+import _ from 'lodash'
+import LazyLoad from 'react-lazyload'
+import { connect } from 'react-redux'
+import { DatePicker, Form, Button, Checkbox, Input, Select, message } from 'antd'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { changeMenu, changeToolboxLoading } from '@/utils/action'
+import { delay } from '@/utils/web'
+import { injectReducer } from '@/utils/store'
+import reducer from './reducer'
+import {
+  LAYOUT_SIZE,
+  FONT_SIZE,
+  CATEGORY_TYPES,
+  VIEW_GROUPS,
+  getLotId,
+  getWaferNo,
+  getDefectId,
+  getStepId
+} from './constant'
+import {
+  StyleManual,
+  StyleDataQuery,
+  DragContainer,
+  DragItem,
+  DragCard,
+  DragList,
+  StyleContainer,
+  StyleImagesGroup,
+  StyleImages
+} from './style'
+
+class Manual extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      dataQueryVisible: false,
+      dateStrings: [],
+      itemsList: ['Product ID', 'Step ID', 'Lot ID', 'Wafer ID', 'Group ID'],
+      items: ['Product ID', 'Step ID', 'Lot ID', 'Wafer ID', 'Group ID'],
+      // images
+      data: {
+        'MB : 0': {
+          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|69|M1_CMP|0': [
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN'
+          ],
+          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|66|M1_CMP|0': [
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN'
+          ],
+          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|207|M1_CMP|0': [
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-95.jpg?op=OPEN',
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-96.jpg?op=OPEN'
+          ]
+        },
+        'MB : 1': {
+          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|7|M1_CMP|1': [
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN'
+          ]
+        }
+      },
+      columns: 5,
+      showLabel: true,
+      labelSize: 12,
+      categoryType: 'mb',
+      classCodes: [
+        {
+          classCode: '0',
+          className: 'No_Review'
+        },
+        {
+          classCode: '1',
+          className: 'FALSE'
+        },
+        {
+          classCode: '2',
+          className: 'Unknown'
+        },
+        {
+          classCode: '278',
+          className: 'MG_Replaced'
+        },
+        {
+          classCode: '279',
+          className: 'MG_Missing;'
+        }
+      ], // ！通过接口获取
+      classCode: '0',
+      viewFilters: ['0', '1', '2', '3', '4', '5', '6', '9', '278', '279'], // ！通过接口获取
+      viewFilter: [],
+      // selected
+      images: [],
+      selected: [],
+      hotkeys: {
+        A: '1',
+        B: '2',
+        C: '3',
+        Y: '278',
+        Z: '279'
+      }
+    }
+  }
+  // 初始化
+  componentDidMount() {
+    this.props.changeMenu('adc')
+    this.loadImages()
+  }
+  // 修改时间
+  onDatePickerChange = (dates, dateStrings) => {
+    this.setState({ dateStrings })
+  }
+  // - - - - - - - - - - - - - - - - - - Drag - - - - - - - - - - - - - - - - - -
+  onQueryChange = newItems => {
+    // 新增项 放置最后
+    let { items } = this.state
+    if (newItems.length > items.length) {
+      const newItem = _.difference(newItems, items)[0]
+      items.push(newItem)
+    } else {
+      const newItem = _.difference(items, newItems)[0]
+      items = items.filter(item => item !== newItem)
+    }
+    this.setState({ items })
+  }
+  onItemsLoad = () => {
+    this.setState({ dataQueryVisible: false })
+    this.loadImages()
+  }
+  onItemsReset = () => {}
+  // - - - - - - - - - - - - - - - - - - Classified - - - - - - - - - - - - - - - - - -
+  onClassifiedOk = () => {}
+  onClassifiedReset = () => {}
+  // - - - - - - - - - - - - - - - - - - Images - - - - - - - - - - - - - - - - - -
+  // 获取图片链接的列表 + 过滤
+  loadImages = async () => {
+    this.props.changeToolboxLoading(true)
+    this.setState({ images: [] })
+    await delay(1)
+    this.props.changeToolboxLoading(false)
+    const { data } = this.state
+    const images = {}
+    let count = 0
+    for (const group in data) {
+      images[group] = []
+      for (const id in data[group]) {
+        for (const index in data[group][id]) {
+          count++
+          images[group].push({
+            id,
+            index,
+            url: data[group][id][index]
+          })
+        }
+      }
+    }
+    this.setState({ images })
+    if (count === 0) message.warning('No photos yet')
+  }
+  /**
+   * 图片选择、反选、连选
+   * @param {String} nextId
+   * @param {Number} index
+   * @param {String} group
+   */
+  onSelect = nextId => {
+    let { selected } = this.state
+    // 普通单选模式
+    if (selected.includes(nextId)) {
+      selected = selected.filter(n => n !== nextId)
+    } else {
+      selected.push(nextId)
+    }
+    this.setState({ selected })
+  }
+  // - - - - - - - - - - - - - - - - - - Drawer - - - - - - - - - - - - - - - - - -
+  // 侧边栏 筛选
+  onFilterSubmit = () => {
+    this.drawer.onClose()
+    this.loadImages()
+  }
+
+  render() {
+    const { dataQueryVisible, itemsList, items } = this.state
+    const { columns, showLabel, labelSize, categoryType, classCodes, classCode, images, selected } = this.state
+    const { viewGroup, viewFilters, viewFilter, hotkeys } = this.state
+
+    return (
+      <StyleManual>
+        <StyleDataQuery>
+          {dataQueryVisible ? (
+            <Form layout='vertical' labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
+              <Form.Item label='Time:'>
+                <DatePicker.RangePicker size='small' onChange={this.onDatePickerChange} />
+              </Form.Item>
+              <Form.Item label='Query:'>
+                <Checkbox.Group options={itemsList} defaultValue={items} onChange={this.onQueryChange} />
+              </Form.Item>
+              {items.length > 0 ? (
+                <Form.Item label=' '>
+                  <DragDropContext onDragEnd={this.onDragEnd}>
+                    <Droppable droppableId='droppable' direction='horizontal'>
+                      {p1 => (
+                        <DragContainer ref={p1.innerRef} {...p1.droppableProps}>
+                          {items.map((item, index) => (
+                            <Draggable key={item} draggableId={item} index={index}>
+                              {p2 => (
+                                <DragItem ref={p2.innerRef} {...p2.draggableProps} {...p2.dragHandleProps}>
+                                  <DragCard>
+                                    <h4>{item}</h4>
+                                    <Input.Search
+                                      // onChange={e => this.onSearchInput(index, e.target.value)}
+                                      // onSearch={() => this.onSearchMark(index)}
+                                      size='small'
+                                      enterButton
+                                    />
+                                    <DragList
+                                      dataSource={[]}
+                                      renderItem={text => (
+                                        <p
+                                        // className={itemSelected[index].includes(text) ? 'active' : ''}
+                                        // onClick={() => this.onSelect(index, text)}
+                                        >
+                                          {/* {text} */}
+                                          aaaaa
+                                        </p>
+                                      )}
+                                    />
+                                  </DragCard>
+                                </DragItem>
+                              )}
+                            </Draggable>
+                          ))}
+                          {p1.placeholder}
+                        </DragContainer>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </Form.Item>
+              ) : null}
+              <Form.Item label=' '>
+                <Button onClick={this.onItemsLoad} type='primary'>
+                  Load
+                </Button>
+                <Button onClick={this.onItemsReset} type='dashed'>
+                  Reset
+                </Button>
+              </Form.Item>
+            </Form>
+          ) : (
+            <Button
+              size='small'
+              style={{ width: '100%' }}
+              onClick={() => this.setState({ dataQueryVisible: true })}
+              type='dashed'
+            >
+              Data Query
+            </Button>
+          )}
+        </StyleDataQuery>
+        <StyleContainer>
+          <div className='image'>
+            <Form layout='vertical' labelCol={{ span: 2 }}>
+              <Form.Item label='Layout:'>
+                <span>Columns:</span>
+                <Select
+                  size='small'
+                  defaultValue={columns}
+                  style={{ width: 55, marginLeft: 5 }}
+                  onChange={columns => this.setState({ columns })}
+                >
+                  {LAYOUT_SIZE.map(s => (
+                    <Select.Option value={s} key={s}>
+                      {s}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Checkbox
+                  size='small'
+                  style={{ marginLeft: 20 }}
+                  onChange={e => this.setState({ showLabel: e.target.checked })}
+                  defaultChecked={showLabel}
+                >
+                  Show Label
+                </Checkbox>
+                {showLabel ? (
+                  <>
+                    <span style={{ marginLeft: 20 }}>Label Size:</span>
+                    <Select
+                      size='small'
+                      style={{ width: 55, marginLeft: 5 }}
+                      value={labelSize}
+                      onChange={labelSize => this.setState({ labelSize })}
+                    >
+                      {FONT_SIZE.map(t => (
+                        <Select.Option value={t} key={t}>
+                          {t}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </>
+                ) : null}
+              </Form.Item>
+              <Form.Item label='Classified:'>
+                <Select
+                  size='small'
+                  style={{ width: 120 }}
+                  defaultValue={categoryType}
+                  onChange={categoryType => this.setState({ categoryType })}
+                >
+                  {CATEGORY_TYPES.map(t => (
+                    <Select.Option value={t[1]} key={t[1]}>
+                      {t[0]}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Select
+                  size='small'
+                  style={{ width: 120 }}
+                  defaultValue={classCode}
+                  onChange={classCode => this.setState({ classCode })}
+                >
+                  {classCodes.map(c => (
+                    <Select.Option value={c.classCode} key={c.classCode}>
+                      {`${c.classCode}-${c.className}`}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Button size='small' onClick={this.onClassifiedOk} type='primary' style={{ marginLeft: 10 }}>
+                  Ok
+                </Button>
+                <Button size='small' onClick={this.onClassifiedReset} type='dashed'>
+                  Reset
+                </Button>
+              </Form.Item>
+            </Form>
+            <StyleImagesGroup>
+              {Object.keys(images).map(key => (
+                <div key={key}>
+                  {images[key].length > 0 ? <h3>【{key}】</h3> : null}
+                  <StyleImages className={`col${columns}`}>
+                    {images[key].map((img, index) => (
+                      <li
+                        key={`${img.id}-${index}`}
+                        className={selected.includes(img.id) ? 'selected' : ''}
+                        onClick={() => this.onSelect(img.id, img.index, key)}
+                      >
+                        <LazyLoad disable height={200} overflow={true}>
+                          <img src={`http://161.189.50.41${img.url}`} alt='' />
+                        </LazyLoad>
+                        {showLabel ? (
+                          <div className={`wafer-info font-size-${labelSize}`}>
+                            <p>Lot ID: {getLotId(img.id)}</p>
+                            <p>Wafer No: {getWaferNo(img.id)}</p>
+                            <p>Defect ID: {getDefectId(img.id)}</p>
+                            <p>Step: {getStepId(img.id)}</p>
+                          </div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </StyleImages>
+                </div>
+              ))}
+            </StyleImagesGroup>
+          </div>
+          <div className='drawer common-drawer'>
+            <section className='util'>
+              <h4 style={{ width: 80 }}>Utilization</h4>
+              <Form layout='vertical' labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+                <Form.Item label='Group:'>
+                  <Select
+                    size='small'
+                    style={{ width: 120 }}
+                    defaultValue={viewGroup}
+                    onChange={viewGroup => this.setState({ viewGroup })}
+                  >
+                    {VIEW_GROUPS.map(g => (
+                      <Select.Option value={g[1]} key={g[1]}>
+                        {g[0]}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label='Filters:'>
+                  <Checkbox.Group
+                    size='small'
+                    options={viewFilters}
+                    onChange={viewFilter => this.setState({ viewFilter })}
+                  />
+                </Form.Item>
+                <Form.Item label=' '>
+                  <Button size='small' onClick={this.onFilterSubmit} style={{ float: 'right' }} type='primary'>
+                    Submit
+                  </Button>
+                </Form.Item>
+              </Form>
+            </section>
+            <section className='info'>
+              <h4 style={{ width: 80 }}>Infomation</h4>
+              <h5>Hotkey Setting</h5>
+              <ul>
+                {Object.keys(hotkeys).map(key => (
+                  <li key={key}>
+                    【{key}】： MB {hotkeys[key]}
+                  </li>
+                ))}
+              </ul>
+              <h5>ADC Module Infomation</h5>
+              <table>
+                <tbody>
+                  <tr>
+                    <td>Name：</td>
+                    <td>Allinabc_f5b3_001</td>
+                  </tr>
+                  <tr>
+                    <td>Time：</td>
+                    <td>2020-03-02</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+        </StyleContainer>
+      </StyleManual>
+    )
+  }
+}
+
+injectReducer('Manual', reducer)
+const mapStateToProps = state => ({ ...state.Manual })
+const mapDispatchToProps = { changeMenu, changeToolboxLoading }
+export default connect(mapStateToProps, mapDispatchToProps)(Manual)

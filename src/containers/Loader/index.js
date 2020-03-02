@@ -5,7 +5,8 @@ const StyledLoader = styled.div`
   display: block;
   background-color: #fff;
   width: 100%;
-  position: ${props => (props.fullScreen ? 'fixed' : 'absolute')};
+  height: 90vh;
+  position: 'fixed';
   top: 0;
   bottom: 0;
   left: 0;
@@ -46,7 +47,7 @@ const Inner = styled.div`
   border-left: 1px solid rgba(0, 0, 0, 0.7);
   border-radius: 50%;
   z-index: 100001;
-  animation: ${spinner} 600ms infinite linear;
+  animation: 600ms infinite linear;
 `
 
 const Text = styled.div`
@@ -59,14 +60,12 @@ const Text = styled.div`
   margin-top: 10px;
 `
 
-export const Loader = props => {
-  const { spinning, fullScreen, text } = props
-
+export const Loader = () => {
   return (
-    <StyledLoader fullScreen={fullScreen} spinning={spinning}>
+    <StyledLoader>
       <Wrapper>
         <Inner />
-        <Text>{text || 'LOADING'}</Text>
+        <Text>LOADING</Text>
       </Wrapper>
     </StyledLoader>
   )
