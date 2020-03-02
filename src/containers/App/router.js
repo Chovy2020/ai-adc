@@ -8,26 +8,17 @@ import { MENUS } from '@/utils/constant'
 
 // Router
 import HomePage from '@/pages'
+import Page404 from '@/pages/Account/404'
 
 const routes = {
   '/': HomePage,
-  // '/*': Page404
+  '/adc': HomePage,
+  '/*': Page404
 }
 
 const generateRoute = (route, key) => <Route key={key} exact={route === '/'} path={route} component={routes[route]} />
 
 class App extends React.Component {
-  componentDidMount() {
-    const path = window.location.pathname || ''
-    let activeMenu = 'toolbox'
-    for (const menu of MENUS) {
-      if (path.indexOf(menu.link) >= 0) {
-        activeMenu = menu.link
-      }
-    }
-    this.props.changeMenu(activeMenu)
-  }
-
   onMenuChange = activeMenu => {
     this.props.changeMenu(activeMenu)
   }
@@ -38,7 +29,9 @@ class App extends React.Component {
     return (
       <BrowserRouter>
         <Header>
-          <Logo>Aurora AI Defect</Logo>
+          <Link to='/'>
+            <Logo>Aurora AI Defect</Logo>
+          </Link>
         </Header>
         <Container>
           <Menu>

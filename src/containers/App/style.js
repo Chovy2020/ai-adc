@@ -18,6 +18,7 @@ export const Logo = styled.div`
   background-size: 75px auto;
   padding-left: 80px;
   font-weight: bold;
+  color: #fff;
 `
 
 export const Container = styled.div`

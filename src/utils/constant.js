@@ -23,6 +23,11 @@ export const TOOLS = [
       title: 'Toolbox'
     },
     {
+      link: 'adc',
+      icon: 'robot',
+      title: 'AI ADC'
+    },
+    {
       link: 'setup',
       icon: 'setting',
       title: 'Setup'
