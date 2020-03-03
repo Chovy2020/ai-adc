@@ -86,7 +86,7 @@ button + button,
 .common-drawer section {
   border: 1px solid #e4e7ed;
   min-height: 40px;
-  padding: 0 15px 5px;
+  padding: 0 5px 5px;
 }
 .common-drawer section + section {
   margin-top: 15px;

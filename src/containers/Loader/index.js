@@ -47,7 +47,7 @@ const Inner = styled.div`
   border-left: 1px solid rgba(0, 0, 0, 0.7);
   border-radius: 50%;
   z-index: 100001;
-  animation: 600ms infinite linear;
+  animation: ${spinner} 600ms infinite linear;
 `
 
 const Text = styled.div`

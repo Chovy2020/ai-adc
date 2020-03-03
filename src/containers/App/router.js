@@ -1,10 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { BrowserRouter, Route, Switch, Redirect, Link } from 'react-router-dom'
-import { Icon, Spin } from 'antd'
-import { Header, Logo, Container, Menu, Main } from './style'
-import { changeMenu } from '@/utils/action'
-import { MENUS } from '@/utils/constant'
+import { Spin } from 'antd'
+import { Header, Logo, Container } from './style'
 
 // ADC
 import Home from '@/pages'
@@ -14,7 +12,6 @@ import Page404 from '@/pages/Account/404'
 
 const routes = {
   '/': Home,
-  '/adc': Home,
   '/manual': Manual,
   '/*': Page404
 }
@@ -22,46 +19,24 @@ const routes = {
 const generateRoute = (route, key) => <Route key={key} exact={route === '/'} path={route} component={routes[route]} />
 
 class App extends React.Component {
-  onMenuChange = activeMenu => {
-    this.props.changeMenu(activeMenu)
-  }
-
   render() {
-    const { activeMenu, toolBoxLoading } = this.props
+    const { toolBoxLoading } = this.props
 
     return (
       <BrowserRouter>
         <Header>
           <Link to='/'>
-            <Logo>Aurora AI Defect</Logo>
+            <Logo>AI ADC</Logo>
           </Link>
         </Header>
         <Container>
-          <Menu>
-            <ul>
-              {MENUS.map(m => (
-                <li
-                  onClick={() => this.onMenuChange(m.link)}
-                  className={activeMenu === m.link ? 'active' : ''}
-                  key={m.link}
-                >
-                  <Link to={m.link}>
-                    <Icon type={m.icon} />
-                    <span>{m.title}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Menu>
-          <Main>
-            <Spin spinning={toolBoxLoading} style={{ height: 'calc(100vh - 50px)' }}>
-              <Switch>
-                {Object.keys(routes).map((route, key) => generateRoute(route, key))}
-                <Route exact path='' component={Home} />
-                <Redirect form='/*' to='/404' />
-              </Switch>
-            </Spin>
-          </Main>
+          <Spin size='large' spinning={toolBoxLoading} style={{ height: 'calc(100vh - 50px)' }}>
+            <Switch>
+              {Object.keys(routes).map((route, key) => generateRoute(route, key))}
+              <Route exact path='' component={Home} />
+              <Redirect form='/*' to='/404' />
+            </Switch>
+          </Spin>
         </Container>
       </BrowserRouter>
     )
@@ -69,5 +44,4 @@ class App extends React.Component {
 }
 
 const mapStateToProps = state => ({ ...state.Init })
-const mapDispatchToProps = { changeMenu }
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(mapStateToProps, {})(App)

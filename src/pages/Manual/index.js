@@ -2,7 +2,7 @@ import React from 'react'
 import _ from 'lodash'
 import LazyLoad from 'react-lazyload'
 import { connect } from 'react-redux'
-import { DatePicker, Form, Button, Checkbox, Input, Select, message } from 'antd'
+import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, Row, Col, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeMenu, changeToolboxLoading } from '@/utils/action'
 import { delay } from '@/utils/web'
@@ -34,7 +34,7 @@ class Manual extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      dataQueryVisible: false,
+      dataQueryVisible: true,
       dateStrings: [],
       itemsList: ['Product ID', 'Step ID', 'Lot ID', 'Wafer ID', 'Group ID'],
       items: ['Product ID', 'Step ID', 'Lot ID', 'Wafer ID', 'Group ID'],
@@ -59,12 +59,24 @@ class Manual extends React.Component {
             '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
             '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN'
           ]
+        },
+        'MB : 2': {
+          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|84|M1_CMP|2': [
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-33.jpg?op=OPEN',
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-34.jpg?op=OPEN'
+          ]
+        },
+        'MB : 3': {
+          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|180|M1_CMP|3': [
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-81.jpg?op=OPEN',
+            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-82.jpg?op=OPEN'
+          ]
         }
       },
-      columns: 5,
+      columns: 6,
       showLabel: true,
       labelSize: 12,
-      categoryType: 'mb',
+      categoryType: 'MB',
       classCodes: [
         {
           classCode: '0',
@@ -84,12 +96,13 @@ class Manual extends React.Component {
         },
         {
           classCode: '279',
-          className: 'MG_Missing;'
+          className: 'MG_Missing'
         }
       ], // ！通过接口获取
       classCode: '0',
       viewFilters: ['0', '1', '2', '3', '4', '5', '6', '9', '278', '279'], // ！通过接口获取
       viewFilter: [],
+      viewGroup: 'MB',
       // selected
       images: [],
       selected: [],
@@ -105,7 +118,7 @@ class Manual extends React.Component {
   // 初始化
   componentDidMount() {
     this.props.changeMenu('adc')
-    this.loadImages()
+    // this.loadImages()
   }
   // 修改时间
   onDatePickerChange = (dates, dateStrings) => {
@@ -124,20 +137,39 @@ class Manual extends React.Component {
     }
     this.setState({ items })
   }
-  onItemsLoad = () => {
+  onItemsLoad = async () => {
+    await this.loadImages()
     this.setState({ dataQueryVisible: false })
-    this.loadImages()
   }
   onItemsReset = () => {}
   // - - - - - - - - - - - - - - - - - - Classified - - - - - - - - - - - - - - - - - -
-  onClassifiedOk = () => {}
-  onClassifiedReset = () => {}
+  onClassifiedOk = () => {
+    const { selected } = this.state
+    if (selected.length === 0) {
+      message.warning('Please select images first')
+      return
+    }
+    this.setState({ selected: [] })
+    message.success('Classification operation succeeded')
+  }
+  onClassifiedReset = () => {
+    this.setState({ selected: [] })
+  }
+  onAddToLibrary = () => {
+    const { selected } = this.state
+    if (selected.length === 0) {
+      message.warning('Please select images first')
+      return
+    }
+    this.setState({ selected: [] })
+    message.success('Add to library succeeded')
+  }
   // - - - - - - - - - - - - - - - - - - Images - - - - - - - - - - - - - - - - - -
   // 获取图片链接的列表 + 过滤
   loadImages = async () => {
     this.props.changeToolboxLoading(true)
     this.setState({ images: [] })
-    await delay(1)
+    await delay(300)
     this.props.changeToolboxLoading(false)
     const { data } = this.state
     const images = {}
@@ -177,18 +209,17 @@ class Manual extends React.Component {
   // - - - - - - - - - - - - - - - - - - Drawer - - - - - - - - - - - - - - - - - -
   // 侧边栏 筛选
   onFilterSubmit = () => {
-    this.drawer.onClose()
     this.loadImages()
   }
 
   render() {
     const { dataQueryVisible, itemsList, items } = this.state
     const { columns, showLabel, labelSize, categoryType, classCodes, classCode, images, selected } = this.state
-    const { viewGroup, viewFilters, viewFilter, hotkeys } = this.state
+    const { viewGroup, viewFilters, hotkeys } = this.state
 
     return (
       <StyleManual>
-        <StyleDataQuery>
+        <StyleDataQuery className={dataQueryVisible ? '' : 'collapse'}>
           {dataQueryVisible ? (
             <Form layout='vertical' labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
               <Form.Item label='Time:'>
@@ -246,6 +277,9 @@ class Manual extends React.Component {
                 <Button onClick={this.onItemsReset} type='dashed'>
                   Reset
                 </Button>
+                <Button onClick={() => this.setState({ dataQueryVisible: false })} type='dashed'>
+                  Collapse
+                </Button>
               </Form.Item>
             </Form>
           ) : (
@@ -259,9 +293,9 @@ class Manual extends React.Component {
             </Button>
           )}
         </StyleDataQuery>
-        <StyleContainer>
+        <StyleContainer className={dataQueryVisible ? '' : 'collapse'}>
           <div className='image'>
-            <Form layout='vertical' labelCol={{ span: 2 }}>
+            <Form layout='vertical' labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
               <Form.Item label='Layout:'>
                 <span>Columns:</span>
                 <Select
@@ -317,7 +351,7 @@ class Manual extends React.Component {
                 </Select>
                 <Select
                   size='small'
-                  style={{ width: 120 }}
+                  style={{ width: 150 }}
                   defaultValue={classCode}
                   onChange={classCode => this.setState({ classCode })}
                 >
@@ -333,6 +367,11 @@ class Manual extends React.Component {
                 <Button size='small' onClick={this.onClassifiedReset} type='dashed'>
                   Reset
                 </Button>
+                <span style={{ margin: '0 5px 0 10px' }}>Hotkey:</span>
+                <Switch defaultChecked={false} />
+                <Button size='small' onClick={this.onAddToLibrary} type='primary'>
+                  Add to Library
+                </Button>
               </Form.Item>
             </Form>
             <StyleImagesGroup>
@@ -346,7 +385,7 @@ class Manual extends React.Component {
                         className={selected.includes(img.id) ? 'selected' : ''}
                         onClick={() => this.onSelect(img.id, img.index, key)}
                       >
-                        <LazyLoad disable height={200} overflow={true}>
+                        <LazyLoad height={200}  offset={300} overflow={true}>
                           <img src={`http://161.189.50.41${img.url}`} alt='' />
                         </LazyLoad>
                         {showLabel ? (
