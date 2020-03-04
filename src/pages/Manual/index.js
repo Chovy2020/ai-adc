@@ -2,15 +2,16 @@ import React from 'react'
 import _ from 'lodash'
 import LazyLoad from 'react-lazyload'
 import { connect } from 'react-redux'
-import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, Row, Col, message } from 'antd'
+import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import { changeMenu, changeToolboxLoading } from '@/utils/action'
+import { changeToolboxLoading } from '@/utils/action'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
 import {
   LAYOUT_SIZE,
   FONT_SIZE,
+  ITEMS_LIST,
   CATEGORY_TYPES,
   VIEW_GROUPS,
   getLotId,
@@ -35,9 +36,11 @@ class Manual extends React.Component {
     super(props)
     this.state = {
       dataQueryVisible: true,
-      dateStrings: [],
-      itemsList: ['Product ID', 'Step ID', 'Lot ID', 'Wafer ID', 'Group ID'],
-      items: ['Product ID', 'Step ID', 'Lot ID', 'Wafer ID', 'Group ID'],
+      time: [],
+      items: ['Product Id', 'Step Id', 'Lot Id', 'Wafer Id', 'Group Id'],
+      itemsData: [],
+      itemsKeyword: [],
+      itemsSelected: [],
       // images
       data: {
         'MB : 0': {
@@ -106,6 +109,7 @@ class Manual extends React.Component {
       // selected
       images: [],
       selected: [],
+      hotkeyEnable: true,
       hotkeys: {
         A: '1',
         B: '2',
@@ -117,14 +121,41 @@ class Manual extends React.Component {
   }
   // 初始化
   componentDidMount() {
-    this.props.changeMenu('adc')
-    // this.loadImages()
+    const { items } = this.state
+    let itemsData = items.map(() => [])
+    let itemsKeyword = items.map(() => '')
+    let itemsSelected = items.map(() => [])
+    itemsData = [
+      ['Device01', 'Device02', 'Device03', 'Device04'],
+      ['M1_CMP', 'M2_CMP', 'M3_CMP'],
+      ['F0002.000', 'F0001.000'],
+      ['1', '2'],
+      ['g001', 'g002']
+    ]
+    itemsSelected = [['Device02'], ['M1_CMP'], ['F0002.000', 'F0001.000'], ['1', '2'], ['g002']]
+    itemsKeyword[1] = 'm1'
+    this.setState({ itemsData, itemsKeyword, itemsSelected })
   }
   // 修改时间
-  onDatePickerChange = (dates, dateStrings) => {
-    this.setState({ dateStrings })
+  onDatePickerChange = (dates, time) => {
+    this.setState({ time })
   }
   // - - - - - - - - - - - - - - - - - - Drag - - - - - - - - - - - - - - - - - -
+  onItemsSearch = index => {}
+  // 点击选择高亮
+  onItemsSelect = (i, text) => {
+    const { items, itemsSelected } = this.state
+    if (itemsSelected[i].includes(text)) itemsSelected[i] = itemsSelected[i].filter(s => s !== text)
+    else itemsSelected[i].push(text)
+    this.setState({ itemsSelected })
+    // 更新下一列的数据
+    if (i < items.length - 1) this.onItemsSearch(i + 1)
+  }
+  onItemsInput = (i, v) => {
+    const { itemsKeyword } = this.state
+    itemsKeyword[i] = v
+    this.setState({ itemsKeyword })
+  }
   onQueryChange = newItems => {
     // 新增项 放置最后
     let { items } = this.state
@@ -213,9 +244,9 @@ class Manual extends React.Component {
   }
 
   render() {
-    const { dataQueryVisible, itemsList, items } = this.state
+    const { dataQueryVisible, items, itemsData, itemsSelected, itemsKeyword } = this.state
     const { columns, showLabel, labelSize, categoryType, classCodes, classCode, images, selected } = this.state
-    const { viewGroup, viewFilters, hotkeys } = this.state
+    const { viewGroup, viewFilters, hotkeys, hotkeyEnable } = this.state
 
     return (
       <StyleManual>
@@ -226,7 +257,7 @@ class Manual extends React.Component {
                 <DatePicker.RangePicker size='small' onChange={this.onDatePickerChange} />
               </Form.Item>
               <Form.Item label='Query:'>
-                <Checkbox.Group options={itemsList} defaultValue={items} onChange={this.onQueryChange} />
+                <Checkbox.Group options={ITEMS_LIST} defaultValue={items} onChange={this.onQueryChange} />
               </Form.Item>
               {items.length > 0 ? (
                 <Form.Item label=' '>
@@ -239,22 +270,25 @@ class Manual extends React.Component {
                               {p2 => (
                                 <DragItem ref={p2.innerRef} {...p2.draggableProps} {...p2.dragHandleProps}>
                                   <DragCard>
-                                    <h4>{item}</h4>
+                                    <h4>
+                                      {item} 【{itemsSelected[index] ? itemsSelected[index].length : 0 || 0}/
+                                      {itemsData[index] ? itemsData[index].length : 0}】
+                                    </h4>
                                     <Input.Search
-                                      // onChange={e => this.onSearchInput(index, e.target.value)}
+                                      value={itemsKeyword[index]}
+                                      onChange={e => this.onItemsInput(index, e.target.value)}
                                       // onSearch={() => this.onSearchMark(index)}
                                       size='small'
                                       enterButton
                                     />
                                     <DragList
-                                      dataSource={[]}
+                                      dataSource={itemsData[index]}
                                       renderItem={text => (
                                         <p
-                                        // className={itemSelected[index].includes(text) ? 'active' : ''}
-                                        // onClick={() => this.onSelect(index, text)}
+                                          className={itemsSelected[index].includes(text) ? 'active' : ''}
+                                          onClick={() => this.onItemsSelect(index, text)}
                                         >
-                                          {/* {text} */}
-                                          aaaaa
+                                          {text}
                                         </p>
                                       )}
                                     />
@@ -368,7 +402,7 @@ class Manual extends React.Component {
                   Reset
                 </Button>
                 <span style={{ margin: '0 5px 0 10px' }}>Hotkey:</span>
-                <Switch defaultChecked={false} />
+                <Switch defaultChecked={hotkeyEnable} />
                 <Button size='small' onClick={this.onAddToLibrary} type='primary'>
                   Add to Library
                 </Button>
@@ -385,7 +419,7 @@ class Manual extends React.Component {
                         className={selected.includes(img.id) ? 'selected' : ''}
                         onClick={() => this.onSelect(img.id, img.index, key)}
                       >
-                        <LazyLoad height={200}  offset={300} overflow={true}>
+                        <LazyLoad height={200} offset={300} overflow={true}>
                           <img src={`http://161.189.50.41${img.url}`} alt='' />
                         </LazyLoad>
                         {showLabel ? (
@@ -468,5 +502,5 @@ class Manual extends React.Component {
 
 injectReducer('Manual', reducer)
 const mapStateToProps = state => ({ ...state.Manual })
-const mapDispatchToProps = { changeMenu, changeToolboxLoading }
+const mapDispatchToProps = { changeToolboxLoading }
 export default connect(mapStateToProps, mapDispatchToProps)(Manual)

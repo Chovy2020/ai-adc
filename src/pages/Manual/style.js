@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Card, List, Row, Col } from 'antd'
+import { Card, List } from 'antd'
 
 export const StyleManual = styled.div`
   margin: 0;
@@ -42,6 +42,9 @@ export const StyleContainer = styled.div`
     padding: 8px;
     .ant-form {
       padding: 0 10px;
+      .ant-form-item-control-wrapper {
+        padding-left: 20px;
+      }
     }
   }
   .drawer {
