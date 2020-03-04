@@ -2,7 +2,7 @@ import React from 'react'
 import _ from 'lodash'
 import LazyLoad from 'react-lazyload'
 import { connect } from 'react-redux'
-import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, message } from 'antd'
+import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, AutoComplete, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeToolboxLoading } from '@/utils/action'
 import { delay } from '@/utils/web'
@@ -80,29 +80,8 @@ class Manual extends React.Component {
       showLabel: true,
       labelSize: 12,
       categoryType: 'MB',
-      classCodes: [
-        {
-          classCode: '0',
-          className: 'No_Review'
-        },
-        {
-          classCode: '1',
-          className: 'FALSE'
-        },
-        {
-          classCode: '2',
-          className: 'Unknown'
-        },
-        {
-          classCode: '278',
-          className: 'MG_Replaced'
-        },
-        {
-          classCode: '279',
-          className: 'MG_Missing'
-        }
-      ], // ！通过接口获取
-      classCode: '0',
+      classCodes: ['0-No_Review', '1-FALSE', '2-Unknown', '278-MG_Replaced', '279-MG_Missing'], // ！通过接口获取
+      classCode: '0-No_Review',
       viewFilters: ['0', '1', '2', '3', '4', '5', '6', '9', '278', '279'], // ！通过接口获取
       viewFilter: [],
       viewGroup: 'MB',
@@ -383,18 +362,15 @@ class Manual extends React.Component {
                     </Select.Option>
                   ))}
                 </Select>
-                <Select
+                <AutoComplete
+                  allowClear
                   size='small'
-                  style={{ width: 150 }}
+                  filterOption={true}
                   defaultValue={classCode}
-                  onChange={classCode => this.setState({ classCode })}
-                >
-                  {classCodes.map(c => (
-                    <Select.Option value={c.classCode} key={c.classCode}>
-                      {`${c.classCode}-${c.className}`}
-                    </Select.Option>
-                  ))}
-                </Select>
+                  dataSource={classCodes}
+                  style={{ width: 150 }}
+                  onSelect={classCode => this.setState({ classCode })}
+                />
                 <Button size='small' onClick={this.onClassifiedOk} type='primary' style={{ marginLeft: 10 }}>
                   Ok
                 </Button>
