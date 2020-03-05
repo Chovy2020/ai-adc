@@ -1,8 +1,6 @@
 const reducer = (
   state = {
-    shiftMultipleMode: false,
-    activeMenu: 'toolbox',
-    toolBoxLoading: false
+    shiftMultipleMode: false
   },
   action
 ) => {

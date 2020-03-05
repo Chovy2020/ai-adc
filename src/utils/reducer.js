@@ -1,11 +1,11 @@
-// 全局数据
-const initialState = {
-  shiftMultipleMode: false,
-  activeMenu: 'adc',
-  toolBoxLoading: false
-}
-
-const initReducer = (state = initialState, action) => {
+const reducer = (
+  state = {
+    shiftMultipleMode: false,
+    activeMenu: 'adc',
+    toolBoxLoading: false
+  },
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_SHIFT_MULTIPLE_MODE':
       return {
@@ -27,4 +27,4 @@ const initReducer = (state = initialState, action) => {
   }
 }
 
-export default initReducer
+export default reducer

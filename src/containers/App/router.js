@@ -7,12 +7,15 @@ import { Header, Logo, Container } from './style'
 // ADC
 import Home from '@/pages'
 import Manual from '@/pages/Manual/Loadable'
+import Library from '@/pages/Library/Loadable'
+
 // Account
 import Page404 from '@/pages/Account/404'
 
 const routes = {
   '/': Home,
   '/manual': Manual,
+  '/library': Library,
   '/*': Page404
 }
 
