@@ -3,7 +3,7 @@ import { Modal } from 'antd'
 
 export const StyleLibrary = styled.div`
   margin: 0;
-  padding: 0;
+  padding: 5px;
   height: 100%;
 `
 
@@ -19,6 +19,7 @@ export const StyleChoose = styled.div`
 export const StyleContainer = styled.div`
   width: 100%;
   height: calc(100vh - 130px);
+  overflow-y: auto;
   .function {
     height: 100%;
     border-left: 1px solid #eee;
@@ -87,8 +88,8 @@ export const StyleImages = styled.ul`
     }
   }
   &.col6 li {
-    width: 16.6%;
-    height: calc(100vw / 6);
+    width: 16.66%;
+    height: calc((100vw - 10px) / 6);
   }
   &.gallery li {
     width: 120px;
@@ -105,6 +106,28 @@ export const StyleImages = styled.ul`
   }
   &.gallery.images li img {
     height: 100%;
+  }
+`
+
+export const StyleCodeDescription = styled.div`
+  position: absolute;
+  right: 5px;
+  top: 0;
+  width: calc((100vw - 10px) / 3 - 5px);
+  display: flex;
+  height: calc(100vw / 6);
+  & > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 5px 5px 10px;
+  }
+  h4 {
+    margin: 0;
+  }
+  textarea.ant-input {
+    width: 100%;
+    flex: 1;
   }
 `
 

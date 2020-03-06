@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import { Form, Button, Input, Select, AutoComplete, Modal, Breadcrumb, message } from 'antd'
 // import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeToolboxLoading } from '@/utils/action'
+import Folder from '@/assets/images/folder.png'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
@@ -16,7 +17,8 @@ import {
   StyleImagesGroup,
   StyleImages,
   StyleDefectInfo,
-  StyleImagesModal
+  StyleImagesModal,
+  StyleCodeDescription
 } from './style'
 
 class Library extends React.Component {
@@ -51,15 +53,19 @@ class Library extends React.Component {
   // 初始化
   componentDidMount() {
     this.setState({ galleryImages: GALLERY_IMAGES })
-    IMAGES_LIBRARY['Group 1']['ProductA_Step 1']['MB 1'] = GALLERY_IMAGES
-    // this.onShowLibrary()
+    this.onShowLibrary()
   }
+  // - - - - - - - - - - - - - - - - - - Show Library - - - - - - - - - - - - - - - - - -
   onShowLibrary = async () => {
-    this.setState({ library: [] })
-    this.props.changeToolboxLoading(true)
-    await delay(500)
-    this.props.changeToolboxLoading(false)
-    this.setState({ library: LIBRARY })
+    // this.setState({ library: [] })
+    // this.props.changeToolboxLoading(true)
+    // await delay(500)
+    // this.props.changeToolboxLoading(false)
+    const library = LIBRARY.map(code => {
+      code.expand = false
+      return code
+    })
+    this.setState({ library })
   }
   onDefectInfoChange = (index, key, value) => {
     const { library } = this.state
@@ -69,7 +75,7 @@ class Library extends React.Component {
   onDefectInfoSave = index => {
     const { library } = this.state
     const { characterization, causeHypothesis } = library[index]
-    console.log('code:', library[index].code, characterization, causeHypothesis)
+    // console.log('code:', library[index].code, characterization, causeHypothesis)
     message.success('Save succeeded')
     this.setState({ editCode: '' })
   }
@@ -81,6 +87,17 @@ class Library extends React.Component {
       selected.push(id)
     }
     this.setState({ selected })
+  }
+  getCodeImagesExample = (codeImages, expand) => {
+    if (!expand && codeImages.length > 4) {
+      codeImages = codeImages.filter((c, i) => i < 4)
+    }
+    return codeImages
+  }
+  onViewMoreImages = (index, expand) => {
+    const { library } = this.state
+    library[index].expand = expand
+    this.setState({ library })
   }
   // - - - - - - - - - - - - - - - - - - Create Library - - - - - - - - - - - - - - - - - -
   onCreateLibrary = () => {
@@ -134,6 +151,7 @@ class Library extends React.Component {
     await delay(500)
     this.props.changeToolboxLoading(false)
     const { galleryRouter, gallerySelected, library } = this.state
+    if (library.length === 0) return
     const images = IMAGES_LIBRARY[galleryRouter.group][galleryRouter.product][galleryRouter.mb]
     const selected = images.filter(img => gallerySelected.includes(img.id))
     library[0].images = [...library[0].images, ...selected]
@@ -181,7 +199,7 @@ class Library extends React.Component {
 
   render() {
     const { groups, visible, createLib, library, editCode, selected, modalMode } = this.state
-    const { galleryVisible, galleryImages, gallerySelected, galleryRouter } = this.state
+    const { galleryVisible, gallerySelected, galleryRouter } = this.state
     const folderList = this.getFolderList()
 
     return (
@@ -263,37 +281,15 @@ class Library extends React.Component {
             </Form.Item>
           </Form>
         </StyleChoose>
-        <StyleContainer style={{ height: 'calc(100vh - 100px)' }}>
+        <StyleContainer>
           {library ? (
             <StyleImagesGroup>
               {library.map((group, index) => (
                 <div key={group.code}>
                   <StyleDefectInfo>
                     <span style={{ display: 'inline-block', fontWeight: 'bold', width: 240 }}>
-                      【Defect Code {group.code}: {group.name}】
+                      【Defect Code {group.code}: {group.name}】: {group.images.length}
                     </span>
-                    <span style={{ marginLeft: 10, marginRight: 2 }}>Characterization:</span>
-                    {editCode === group.code ? (
-                      <Input
-                        defaultValue={group.characterization}
-                        size='small'
-                        onChange={e => this.onDefectInfoChange(index, 'characterization', e.target.value)}
-                        style={{ width: 120, marginLeft: 10 }}
-                      />
-                    ) : (
-                      <span>{group.characterization}</span>
-                    )}
-                    <span style={{ marginLeft: 10, marginRight: 2 }}>Cause/Hypothesis:</span>
-                    {editCode === group.code ? (
-                      <Input
-                        defaultValue={group.causeHypothesis}
-                        size='small'
-                        onChange={e => this.onDefectInfoChange(index, 'causeHypothesis', e.target.value)}
-                        style={{ width: 120, marginLeft: 10 }}
-                      />
-                    ) : (
-                      <span>{group.causeHypothesis}</span>
-                    )}
                     {editCode === group.code ? (
                       <Button
                         size='small'
@@ -313,9 +309,32 @@ class Library extends React.Component {
                         Edit
                       </Button>
                     )}
+                    {group.images.length > 4 ? (
+                      <>
+                        {group.expand ? (
+                          <Button
+                            size='small'
+                            type='primary'
+                            onClick={() => this.onViewMoreImages(index, false)}
+                            style={{ width: 40, marginLeft: 10 }}
+                          >
+                            Collapse
+                          </Button>
+                        ) : (
+                          <Button
+                            size='small'
+                            type='primary'
+                            onClick={() => this.onViewMoreImages(index, true)}
+                            style={{ width: 40, marginLeft: 10 }}
+                          >
+                            More
+                          </Button>
+                        )}
+                      </>
+                    ) : null}
                   </StyleDefectInfo>
-                  <StyleImages className={`col6`}>
-                    {group.images.map((img, index) => (
+                  <StyleImages className={`col6`} style={{ position: 'relative' }}>
+                    {this.getCodeImagesExample(group.images, group.expand).map((img, index) => (
                       <li
                         key={img.id}
                         className={selected.includes(img.id) ? 'selected' : ''}
@@ -324,6 +343,28 @@ class Library extends React.Component {
                         <img src={`http://161.189.50.41${img.url}`} alt='' />
                       </li>
                     ))}
+                    {!group.expand ? (
+                      <StyleCodeDescription>
+                        <div>
+                          <h4>Characterization:</h4>
+                          <Input.TextArea
+                            disabled={editCode !== group.code}
+                            defaultValue={group.characterization}
+                            size='small'
+                            onChange={e => this.onDefectInfoChange(index, 'characterization', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <h4>Cause/Hypothesis:</h4>
+                          <Input.TextArea
+                            disabled={editCode !== group.code}
+                            defaultValue={group.causeHypothesis}
+                            size='small'
+                            onChange={e => this.onDefectInfoChange(index, 'causeHypothesis', e.target.value)}
+                          />
+                        </div>
+                      </StyleCodeDescription>
+                    ) : null}
                   </StyleImages>
                 </div>
               ))}
@@ -408,7 +449,7 @@ class Library extends React.Component {
             <StyleImages className='gallery'>
               {folderList.map(folder => (
                 <li key={folder} onDoubleClick={() => this.onGalleryFolderDbClick(folder)}>
-                  <img src={`http://161.189.50.41/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN`} alt='' />
+                  <img src={Folder} alt='' />
                   <p>{folder}</p>
                 </li>
               ))}
