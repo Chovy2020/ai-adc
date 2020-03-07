@@ -8,6 +8,7 @@ import { Header, Logo, Container } from './style'
 import Home from '@/pages'
 import Manual from '@/pages/Manual/Loadable'
 import Library from '@/pages/Library/Loadable'
+import Builder from '@/pages/Builder/Loadable'
 
 // Account
 import Page404 from '@/pages/Account/404'
@@ -16,6 +17,7 @@ const routes = {
   '/': Home,
   '/manual': Manual,
   '/library': Library,
+  '/builder': Builder,
   '/*': Page404
 }
 

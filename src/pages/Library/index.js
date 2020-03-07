@@ -53,14 +53,14 @@ class Library extends React.Component {
   // 初始化
   componentDidMount() {
     this.setState({ galleryImages: GALLERY_IMAGES })
-    this.onShowLibrary()
+    // this.onShowLibrary()
   }
   // - - - - - - - - - - - - - - - - - - Show Library - - - - - - - - - - - - - - - - - -
   onShowLibrary = async () => {
-    // this.setState({ library: [] })
-    // this.props.changeToolboxLoading(true)
-    // await delay(500)
-    // this.props.changeToolboxLoading(false)
+    this.setState({ library: [] })
+    this.props.changeToolboxLoading(true)
+    await delay(500)
+    this.props.changeToolboxLoading(false)
     const library = LIBRARY.map(code => {
       code.expand = false
       return code
@@ -73,8 +73,8 @@ class Library extends React.Component {
     this.setState({ library })
   }
   onDefectInfoSave = index => {
-    const { library } = this.state
-    const { characterization, causeHypothesis } = library[index]
+    // const { library } = this.state
+    // const { characterization, causeHypothesis } = library[index]
     // console.log('code:', library[index].code, characterization, causeHypothesis)
     message.success('Save succeeded')
     this.setState({ editCode: '' })
@@ -438,7 +438,7 @@ class Library extends React.Component {
                       {galleryRouter.product}
                     </Breadcrumb.Item>
                     {galleryRouter.mb ? (
-                      <Breadcrumb.Item onClick={() => this.onGalleryRouterClick(3)}>{galleryRouter.mb}</Breadcrumb.Item>
+                      <Breadcrumb.Item>{galleryRouter.mb}</Breadcrumb.Item>
                     ) : null}
                   </>
                 ) : null}

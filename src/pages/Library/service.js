@@ -34,6 +34,7 @@ export const getFolder = () => post('library/get_library', data)
 /**
  * @param {String} libraryId
  * @param {Array} imageIds
+ * @param {String} code
  */
 export const addImages = () => post('library/get_library', data)
 

@@ -39,6 +39,7 @@ export const StyleImagesGroup = styled.div`
     margin: 0;
   }
 `
+
 export const StyleImages = styled.ul`
   width: 100%;
   padding: 0;
