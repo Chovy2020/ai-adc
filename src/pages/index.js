@@ -53,7 +53,7 @@ class ADC extends React.Component {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.props.changeMenu('adc')
   }
 

@@ -2,11 +2,17 @@ const reducer = (
   state = {
     shiftMultipleMode: false,
     activeMenu: 'adc',
-    toolBoxLoading: false
+    toolBoxLoading: false,
+    classifyCodes: []
   },
   action
 ) => {
   switch (action.type) {
+    case 'CLASSIFY_CODES_INIT':
+      return {
+        ...state,
+        classifyCodes: action.payload
+      }
     case 'CHANGE_SHIFT_MULTIPLE_MODE':
       return {
         ...state,

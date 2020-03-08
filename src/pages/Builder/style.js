@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-// import { Modal } from 'antd'
+import { Modal } from 'antd'
 
 export const StyleBuilder = styled.div`
   margin: 0;
@@ -39,7 +39,7 @@ export const StyleToolsGroup = styled.div`
   }
 `
 
-export const StyleModelImages = styled.div`
+export const StyleImagesContainer = styled.div`
   padding: 10px 0;
   width: 100%;
   margin-top: 10px;
@@ -112,15 +112,43 @@ export const StyleImages = styled.ul`
   }
   &.gallery li {
     width: 120px;
-    height: 130px;
+    height: 120px;
     display: block;
     img {
-      height: 110px;
+      height: 90px;
     }
     p {
       line-height: 20px;
       margin: 0;
       text-align: center;
     }
+  }
+  &.images li {
+    width: 120px;
+    height: 120px;
+    display: block;
+    img {
+      height: 110px;
+    }
+  }
+`
+
+
+export const StyleImagesModal = styled(Modal)`
+  .ant-modal-body {
+    padding: 20px;
+    max-height: 450px;
+    overflow-y: auto;
+  }
+  .ant-breadcrumb {
+    padding: 0 10px;
+  }
+  .ant-breadcrumb-link {
+    color: #1890ff;
+    cursor: pointer;
+  }
+  .ant-breadcrumb span:last-child .ant-breadcrumb-link {
+    color: rgba(0, 0, 0, 0.65);
+    cursor: default;
   }
 `
