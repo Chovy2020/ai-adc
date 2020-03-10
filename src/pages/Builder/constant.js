@@ -6,27 +6,27 @@ export const FONT_SIZE = ['12', '14', '16', '18']
 export const PRE_TREATMENT = [
   {
     icon: 'edit',
-    name: 'edit'
+    name: '编辑'
   },
   {
     icon: 'copy',
-    name: 'copy'
+    name: '拷贝'
   },
   {
     icon: 'delete',
-    name: 'delete'
+    name: '删除'
   },
   {
     icon: 'snippets',
-    name: 'snippets'
+    name: '切片'
   },
   {
     icon: 'diff',
-    name: 'diff'
+    name: '比较'
   },
   {
     icon: 'highlight',
-    name: 'highlight'
+    name: '高亮'
   }
 ]
 

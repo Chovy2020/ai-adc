@@ -76,7 +76,7 @@ class Library extends React.Component {
     // const { library } = this.state
     // const { characterization, causeHypothesis } = library[index]
     // console.log('code:', library[index].code, characterization, causeHypothesis)
-    message.success('Save succeeded')
+    message.success('Save successfully')
     this.setState({ editCode: '' })
   }
   onImageSelect = id => {

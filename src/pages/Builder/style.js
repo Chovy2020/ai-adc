@@ -152,3 +152,49 @@ export const StyleImagesModal = styled(Modal)`
     cursor: default;
   }
 `
+
+
+export const StyleModelContainer = styled.div`
+  padding: 10px 0;
+  width: 100%;
+  margin-top: 10px;
+  .ant-row {
+    width: 80%;
+  }
+  .ant-col {
+    text-align: center;
+  }
+  .model-icon {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  .model-block {
+    border: 1px solid #ccc;
+    min-height: 200px;
+  }
+  h4 {
+    margin: 0;
+    padding: 8px;
+  }
+`
+
+export const StyleModelList = styled.ul`
+  display: block;
+  width: 100%;
+  padding: 10px;
+  height: 100%;
+  li button {
+    text-align: left;
+    width: 180px;
+  }
+  li + li {
+    margin-top: 10px;
+  }
+  button.config {
+    background-color: green;
+    border: none;
+  }
+`
