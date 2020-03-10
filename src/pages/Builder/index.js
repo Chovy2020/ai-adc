@@ -327,6 +327,10 @@ class Builder extends React.Component {
   onModelSave = () => {
     message.success('Save successfully')
   }
+  onModelSaveAs = () => {
+    // 弹出层 选择groupId和输入modelName
+    this.setState({ createVisible: true })
+  }
   // - - - - - - - - - - - - - - - - - - Gallery Images - - - - - - - - - - - - - - - - - -
   onGalleryImageSelect = id => {
     let { gallerySelected } = this.state
@@ -625,10 +629,15 @@ class Builder extends React.Component {
                 <Link to='/config'>
                   <Button type='primary'>Training</Button>
                 </Link>
-                <Link to='/reporting' style={{ margin: '0 10px'}}>
+                <Link to='/reporting' style={{ margin: '0 10px' }}>
                   <Button type='primary'>View Result</Button>
                 </Link>
-                <Button onClick={this.onModelSave} type='primary'>Save</Button>
+                <Button onClick={this.onModelSave} type='primary'>
+                  Save
+                </Button>
+                <Button onClick={this.onModelSaveAs} type='primary'>
+                  Save As
+                </Button>
               </div>
             </StyleModelContainer>
           </Col>
@@ -728,10 +737,33 @@ class Builder extends React.Component {
           onOk={this.onCreateModalOk}
           onCancel={() => this.setState({ createVisible: false })}
         >
-          <Input
-            onChange={e => this.setState({ createModalName: e.target.value })}
-            placeholder='Please input model name'
-          />
+          <Form
+            style={{ width: 400, margin: '0 auto' }}
+            layout='vertical'
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 18 }}
+          >
+            <Form.Item label='Group Id:'>
+              <Select
+                size='small'
+                placeholder='Step Id'
+                style={{ width: 120, marginLeft: 10 }}
+                onChange={group => this.setState({ group })}
+              >
+                {['aaa', 'bbb', 'ccc'].map(s => (
+                  <Select.Option value={s} key={s}>
+                    {s}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item label='Model Name:'>
+              <Input
+                onChange={e => this.setState({ createModalName: e.target.value })}
+                placeholder='Please input model name'
+              />
+            </Form.Item>
+          </Form>
         </Modal>
       </StyleBuilder>
     )

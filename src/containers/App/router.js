@@ -9,6 +9,8 @@ import Home from '@/pages'
 import Manual from '@/pages/Manual/Loadable'
 import Library from '@/pages/Library/Loadable'
 import Builder from '@/pages/Builder/Loadable'
+import Config from '@/pages/Config/Loadable'
+import Reporting from '@/pages/Reporting/Loadable'
 
 // Account
 import Page404 from '@/pages/Account/404'
@@ -18,6 +20,8 @@ const routes = {
   '/manual': Manual,
   '/library': Library,
   '/builder': Builder,
+  '/config': Config,
+  '/reporting': Reporting,
   '/*': Page404
 }
 
