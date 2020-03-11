@@ -264,7 +264,7 @@ export const LIBRARY = [
     defect: 3
   },
   {
-    id: 34,
+    id: 434,
     url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
     defect: 3
   },
@@ -315,7 +315,7 @@ export const LIBRARY = [
     defect: 69
   },
   {
-    id: 22,
+    id: 822,
     url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
     defect: 69
   },
@@ -335,7 +335,7 @@ export const LIBRARY = [
     defect: 4
   },
   {
-    id: 25,
+    id: 825,
     url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
     defect: 5
   },
@@ -355,7 +355,7 @@ export const LIBRARY = [
     defect: 3
   },
   {
-    id: 34,
+    id: 834,
     url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
     defect: 3
   },
