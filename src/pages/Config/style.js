@@ -1,9 +1,9 @@
 import styled from 'styled-components'
-import { Row, Col } from 'antd'
+import { Row, Col, Modal } from 'antd'
 
 export const StyleConfig = styled.div`
   margin: 0;
-  padding: 0 20px;
+  padding: 0 20px 20px;
   height: calc(100vh - 50px);
   overflow-y: auto;
 `
@@ -101,15 +101,38 @@ export const StylePermission = styled.div`
     border-top: 1px solid #ddd;
     padding: 10px 20px;
     h5 {
-        display: block;
-        width: 100px;
-        margin-top: -20px;
-        line-height: 20px;
-        background-color: #fff;
-        text-align: center;
+      display: block;
+      width: 100px;
+      margin-top: -20px;
+      line-height: 20px;
+      background-color: #fff;
+      text-align: center;
     }
     .ant-form-vertical .ant-form-item-label {
-        text-align: right;
+      text-align: right;
     }
+  }
+`
+
+export const StyleTransferModal = styled(Modal)`
+  button {
+    min-width: 20px;
+    & + button {
+      margin: 0;
+    }
+  }
+`
+
+export const StyleFunction = styled.div`
+  border: 1px solid #ddd;
+  margin-top: 20px;
+  padding-bottom: 20px;
+  h4 {
+    padding-left: 20px;
+    margin: 10px 0;
+  }
+  .ant-col-6 {
+    margin-left: 20px;
+    padding: 10px;
   }
 `

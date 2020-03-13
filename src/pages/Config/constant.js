@@ -1,6 +1,6 @@
 export const SYSTEM_MODULES = ['Manual Classification', 'Defect Library', 'ADC Builder', 'Reporting', 'Mgt & Config']
 
-export const USER_GROUP = ['Administrator', 'Engineer', 'Operator']
+export const ROLES = ['Administrator', 'Engineer', 'Operator']
 
 export const MODEL_LIFECYCLE = [
   {

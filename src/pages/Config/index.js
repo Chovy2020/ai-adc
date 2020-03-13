@@ -1,7 +1,7 @@
 import React from 'react'
-import { Col, Button, Tabs, Form, Checkbox } from 'antd'
+import { Row, Col, Button, Tabs, Form, Checkbox, Transfer } from 'antd'
 // import { delay } from '@/utils/web'
-import { SYSTEM_MODULES, MODEL_LIFECYCLE, USER_GROUP } from './constant'
+import { SYSTEM_MODULES, MODEL_LIFECYCLE, ROLES } from './constant'
 import {
   StyleConfig,
   StyleManagement,
@@ -9,7 +9,9 @@ import {
   StyleModel,
   StyleLifecycle,
   StyleConfiguration,
-  StylePermission
+  StylePermission,
+  StyleTransferModal,
+  StyleFunction
 } from './style'
 import Legend from '@/assets/images/legend.png'
 
@@ -35,7 +37,24 @@ class Config extends React.Component {
           privilege: [],
           user: ['lucy(00002)', 'mary(00003)']
         }
-      ]
+      ],
+      transferVisible: false,
+      users: [
+        {
+          key: 1,
+          name: 'Jack'
+        },
+        {
+          key: 2,
+          name: 'Mary'
+        },
+        {
+          key: 3,
+          name: 'Tony'
+        }
+      ],
+      selected: [],
+      target: []
     }
   }
 
@@ -43,14 +62,38 @@ class Config extends React.Component {
     this.setState({ modelLifecycle: MODEL_LIFECYCLE })
   }
 
-  onModulesChange = modules => {
-    console.log(modules)
+  onModulesChange = (role, modules) => {
+    console.log(role, modules)
+    const { permission } = this.state
+    for (const r of permission) {
+      if (r.name === role) {
+        r.privilege = modules
+        break
+      }
+    }
+    this.setState({ permission })
+  }
+
+  onRoleUserEdit = role => {
+    this.setState({ transferVisible: true })
+  }
+
+  onUsersSelect = selected => {
+    this.setState({ selected })
+  }
+  onUsersTransfer = target => {
+    this.setState({ target })
+  }
+  onTransferModalOk = () => {
+    const { target } = this.state
+    console.log(target)
+    this.setState({ transferVisible: false })
   }
 
   render() {
     const { activePane } = this.state
     const { modelLifecycle } = this.state
-    const { permission } = this.state
+    const { permission, transferVisible, users, selected, target } = this.state
 
     return (
       <StyleConfig>
@@ -100,22 +143,51 @@ class Config extends React.Component {
             <StyleConfiguration>
               <StylePermission>
                 <h4>User & Privilege</h4>
-                {USER_GROUP.map(group => (
-                  <Form key={group} layout='vertical' labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
-                    <h5>{group}</h5>
+                {ROLES.map(role => (
+                  <Form key={role} layout='vertical' labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
+                    <h5>{role}</h5>
                     <Form.Item label='Privilege'>
                       <Checkbox.Group
                         options={SYSTEM_MODULES}
-                        onChange={modules => this.onModulesChange(group, modules)}
+                        onChange={modules => this.onModulesChange(role, modules)}
                       />
                     </Form.Item>
                     <Form.Item label='User'>
-                      <span>{permission.filter(per => per.name === group)[0].user.map(u => `${u}; `)}</span>
-                      <Button size='small'>Edit</Button>
+                      <span>{permission.filter(per => per.name === role)[0].user.map(u => `${u}; `)}</span>
+                      <Button size='small' onClick={() => this.onRoleUserEdit(role)}>
+                        Edit
+                      </Button>
                     </Form.Item>
                   </Form>
                 ))}
               </StylePermission>
+              <StyleTransferModal
+                title='Manage User List'
+                visible={transferVisible}
+                onOk={this.onTransferModalOk}
+                onCancel={() => this.setState({ transferVisible: false })}
+              >
+                <Transfer
+                  dataSource={users}
+                  titles={['Source', 'Target']}
+                  targetKeys={target}
+                  selectedKeys={selected}
+                  onChange={this.onUsersTransfer}
+                  onSelectChange={this.onUsersSelect}
+                  render={u => u.name}
+                />
+              </StyleTransferModal>
+              <StyleFunction>
+                <h4>Model Function</h4>
+                <Row>
+                  {['Training', 'Pi-run', 'Production'].map(item => (
+                    <Col span={6} style={{ border: '1px solid #ddd' }}>
+                      <h5>{item}</h5>
+                      <Checkbox.Group options={['Update klarf ADC', 'Update Klarf MB']} />
+                    </Col>
+                  ))}
+                </Row>
+              </StyleFunction>
             </StyleConfiguration>
           </Tabs.TabPane>
         </Tabs>
