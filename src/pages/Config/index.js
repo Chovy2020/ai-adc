@@ -65,7 +65,7 @@ class EditableCell extends React.Component {
   }
   renderCell = form => {
     this.form = form
-    const { children, dataIndex, record, title } = this.props
+    const { children, dataIndex, record } = this.props
     const { editing } = this.state
     return editing ? (
       <Form.Item style={{ margin: 0 }}>
