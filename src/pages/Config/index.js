@@ -93,7 +93,7 @@ class Config extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      activePane: '2',
+      activePane: '1',
       modelLifecycle: [],
       permission: [
         {
@@ -514,7 +514,7 @@ class Config extends React.Component {
                   itemLayout='horizontal'
                   dataSource={Object.keys(hotkeyMapping)}
                   renderItem={key => (
-                    <List.Item actions={[<a onClick={() => this.onDeleteHotkey(key)}>Delete</a>]}>
+                    <List.Item actions={[<span onClick={() => this.onDeleteHotkey(key)}>Delete</span>]}>
                       {`${key} - ${hotkeyMapping[key]}`}
                     </List.Item>
                   )}
