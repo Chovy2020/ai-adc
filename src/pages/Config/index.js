@@ -15,6 +15,8 @@ import {
   Select,
   List
 } from 'antd'
+import { connect } from 'react-redux'
+import { changeMenu } from '@/utils/action'
 // import { delay } from '@/utils/web'
 import { SYSTEM_MODULES, MODEL_LIFECYCLE, ROLES } from './constant'
 import {
@@ -179,6 +181,7 @@ class Config extends React.Component {
   }
 
   componentDidMount() {
+    this.props.changeMenu('config')
     this.setState({ modelLifecycle: MODEL_LIFECYCLE })
   }
 
@@ -528,4 +531,6 @@ class Config extends React.Component {
   }
 }
 
-export default Config
+// injectReducer('Builder', reducer)
+const mapDispatchToProps = { changeMenu }
+export default connect(() => ({}), mapDispatchToProps)(Config)

@@ -1,6 +1,8 @@
 import React from 'react'
 import echarts from 'echarts'
+import { connect } from 'react-redux'
 import { Row, Col, Button, Input, Checkbox, Select } from 'antd'
+import { changeMenu } from '@/utils/action'
 import { delay } from '@/utils/web'
 import { LIBRARY } from '@/pages/Builder/constant'
 import { TABLE_DATA } from './constant'
@@ -47,6 +49,7 @@ class Reporting extends React.Component {
   }
 
   componentDidMount() {
+    this.props.changeMenu('reporting')
     const overviewChart1 = echarts.init(document.getElementById('overview-chart-1'))
     const overviewChart2 = echarts.init(document.getElementById('overview-chart-2'))
     this.setState({ overviewChart1, overviewChart2 })
@@ -327,4 +330,6 @@ class Reporting extends React.Component {
   }
 }
 
-export default Reporting
+// injectReducer('Builder', reducer)
+const mapDispatchToProps = { changeMenu }
+export default connect(() => ({}), mapDispatchToProps)(Reporting)

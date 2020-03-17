@@ -1,3 +1,8 @@
+import IconConfig from '@/assets/images/Config.png'
+import IconLibrary from '@/assets/images/Library.png'
+import IconBuilder from '@/assets/images/Builder.png'
+import IconManual from '@/assets/images/Manual.png'
+import IconReporting from '@/assets/images/Reporting.png'
 // 菜单：链接、图片、标题
 export const MENUS = [
   {
@@ -30,22 +35,27 @@ export const MENUS = [
 export const MODULES = [
   {
     title: 'Manual Classification',
-    link: 'manual'
+    link: 'manual',
+    icon: IconManual
   },
   {
     title: 'Defect Library',
-    link: 'library'
+    link: 'library',
+    icon: IconLibrary
   },
   {
     title: 'ADC Builder',
-    link: 'builder'
+    link: 'builder',
+    icon: IconBuilder
   },
   {
     title: 'Reporting',
-    link: 'reporting'
+    link: 'reporting',
+    icon: IconReporting
   },
   {
     title: 'Mgt & Config',
-    link: 'config'
+    link: 'config',
+    icon: IconConfig
   }
 ]

@@ -1,7 +1,7 @@
 const reducer = (
   state = {
     shiftMultipleMode: false,
-    activeMenu: 'adc',
+    activeMenu: '',
     toolBoxLoading: false,
     classifyCodes: []
   },

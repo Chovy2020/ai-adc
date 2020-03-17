@@ -20,7 +20,7 @@ import {
   message
 } from 'antd'
 // import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import { changeToolboxLoading } from '@/utils/action'
+import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import Folder from '@/assets/images/folder.png'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
@@ -81,6 +81,7 @@ class Builder extends React.Component {
   }
   // 初始化
   componentDidMount() {
+    this.props.changeMenu('builder')
     this.loadFiles(true)
     this.setState({ library: LIBRARY })
     // this.setState({ classifyCodes: await getClassifyCodes() })
@@ -772,5 +773,5 @@ class Builder extends React.Component {
 
 injectReducer('Builder', reducer)
 const mapStateToProps = state => ({ ...state.Builder })
-const mapDispatchToProps = { changeToolboxLoading }
+const mapDispatchToProps = { changeToolboxLoading, changeMenu }
 export default connect(mapStateToProps, mapDispatchToProps)(Builder)

@@ -1,46 +1,43 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { Card } from 'antd'
 import styled from 'styled-components'
-import Favicon from '@/assets/images/favicon.png'
 import { changeMenu } from '@/utils/action'
 import { MODULES } from '@/utils/constant'
 
-const StyleModules = styled.ul`
-  list-style: none;
-  width: calc(290px * 4 + 40px);
-  margin-bottom: 0;
-  padding: 20px;
+const StyleModuleContainer = styled.div`
+  background-color: #f3f9fb;
+  width: 100%;
+  height: calc(100vh - 50px);
+  padding-top: 150px;
+  & > ul {
+    list-style: none;
+    width: 960px;
+    margin: 0 auto;
+    padding: 0;
+  }
   li {
-    width: 250px;
-    height: 230px;
-    margin: 20px;
+    width: 300px;
+    height: 160px;
+    margin: 10px;
     float: left;
-    a {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      font-size: 16px;
-      height: 100%;
-      color: #fff;
-      .ant-card {
-        width: 100%;
-        .ant-card-head-title {
-          padding: 11px 0;
-        }
-        .ant-card-body {
-          padding: 0;
-          height: 180px;
-          overflow: hidden;
-          img {
-            width: 100%;
-            margin-top: -30px;
-          }
-        }
-      }
-    }
+  }
+`
+const StyleModule = styled(Link)`
+  display: block;
+  text-align: center;
+  width: 100%;
+  font-size: 16px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+  padding: 30px 0 0;
+  &:hover {
+    box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.2);
+  }
+  img {
+    margin: 0 auto 20px;
   }
 `
 
@@ -54,22 +51,23 @@ class ADC extends React.Component {
   }
 
   async componentDidMount() {
-    this.props.changeMenu('adc')
+    this.props.changeMenu('')
   }
 
   render() {
     return (
-      <StyleModules>
-        {MODULES.map(m => (
-          <li key={m.title}>
-            <Link to={m.link}>
-              <Card title={m.title}>
-                <img src={Favicon} alt='' />
-              </Card>
-            </Link>
-          </li>
-        ))}
-      </StyleModules>
+      <StyleModuleContainer>
+        <ul>
+          {MODULES.map(m => (
+            <li key={m.title}>
+              <StyleModule to={m.link}>
+                <img src={m.icon} alt='' />
+                <h3>{m.title}</h3>
+              </StyleModule>
+            </li>
+          ))}
+        </ul>
+      </StyleModuleContainer>
     )
   }
 }

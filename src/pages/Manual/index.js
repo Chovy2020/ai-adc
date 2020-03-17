@@ -5,7 +5,7 @@ import { HotKeys } from 'react-hotkeys'
 import { connect } from 'react-redux'
 import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, AutoComplete, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import { changeToolboxLoading } from '@/utils/action'
+import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
@@ -108,8 +108,10 @@ class Manual extends React.Component {
       keyHandlers: {}
     }
   }
+  
   // 初始化
   componentDidMount() {
+    this.props.changeMenu('manual')
     const { items } = this.state
     let itemsData = items.map(() => [])
     let itemsKeyword = items.map(() => '')
@@ -508,5 +510,5 @@ class Manual extends React.Component {
 
 injectReducer('Manual', reducer)
 const mapStateToProps = state => ({ ...state.Manual })
-const mapDispatchToProps = { changeToolboxLoading }
+const mapDispatchToProps = { changeToolboxLoading, changeMenu }
 export default connect(mapStateToProps, mapDispatchToProps)(Manual)
