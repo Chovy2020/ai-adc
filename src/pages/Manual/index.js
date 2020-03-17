@@ -1,6 +1,7 @@
 import React from 'react'
 import _ from 'lodash'
 import LazyLoad from 'react-lazyload'
+import { HotKeys } from 'react-hotkeys'
 import { connect } from 'react-redux'
 import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, AutoComplete, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
@@ -89,13 +90,22 @@ class Manual extends React.Component {
       images: [],
       selected: [],
       hotkeyEnable: true,
-      hotkeys: {
-        A: '1',
-        B: '2',
-        C: '3',
-        Y: '278',
-        Z: '279'
-      }
+      hotkeys: [
+        {
+          key: 'A',
+          code: '1-FALSE'
+        },
+        {
+          key: 'B',
+          code: '2-Unknown'
+        },
+        {
+          key: 'C',
+          code: '278-MG_Replaced'
+        }
+      ],
+      keyMap: {},
+      keyHandlers: {}
     }
   }
   // 初始化
@@ -114,6 +124,7 @@ class Manual extends React.Component {
     itemsSelected = [['Device02'], ['M1_CMP'], ['F0002.000', 'F0001.000'], ['1', '2'], ['g002']]
     itemsKeyword[1] = 'm1'
     this.setState({ itemsData, itemsKeyword, itemsSelected })
+    this.generateKeyMapAndHandlers()
   }
   // 修改时间
   onDatePickerChange = (dates, time) => {
@@ -153,7 +164,12 @@ class Manual extends React.Component {
   }
   onItemsReset = () => {}
   // - - - - - - - - - - - - - - - - - - Classified - - - - - - - - - - - - - - - - - -
-  onClassifiedOk = () => {
+  onClassifiedOk = params => {
+    if (typeof params === 'string') {
+      console.log('Hotkey classification', params)
+    } else {
+      console.log('Manual classification')
+    }
     const { selected } = this.state
     if (selected.length === 0) {
       message.warning('Please select images first')
@@ -222,10 +238,22 @@ class Manual extends React.Component {
     this.loadImages()
   }
 
+  generateKeyMapAndHandlers = () => {
+    const { hotkeys } = this.state
+    const keyMap = {}
+    const keyHandlers = {}
+    for (const h of hotkeys) {
+      const key = h.key.toLocaleLowerCase()
+      keyMap[key] = key
+      keyHandlers[key] = () => this.onClassifiedOk(h.code)
+    }
+    this.setState({ keyMap, keyHandlers })
+  }
+
   render() {
     const { dataQueryVisible, items, itemsData, itemsSelected, itemsKeyword } = this.state
     const { columns, showLabel, labelSize, categoryType, classCodes, classCode, images, selected } = this.state
-    const { viewGroup, viewFilters, hotkeys, hotkeyEnable } = this.state
+    const { viewGroup, viewFilters, hotkeys, keyMap, keyHandlers, hotkeyEnable } = this.state
 
     return (
       <StyleManual>
@@ -385,32 +413,34 @@ class Manual extends React.Component {
               </Form.Item>
             </Form>
             <StyleImagesGroup>
-              {Object.keys(images).map(key => (
-                <div key={key}>
-                  {images[key].length > 0 ? <h3>【{key}】</h3> : null}
-                  <StyleImages className={`col${columns}`}>
-                    {images[key].map((img, index) => (
-                      <li
-                        key={`${img.id}-${index}`}
-                        className={selected.includes(img.id) ? 'selected' : ''}
-                        onClick={() => this.onSelect(img.id, img.index, key)}
-                      >
-                        <LazyLoad height={200} offset={300} overflow={true}>
-                          <img src={`http://161.189.50.41${img.url}`} alt='' />
-                        </LazyLoad>
-                        {showLabel ? (
-                          <div className={`wafer-info font-size-${labelSize}`}>
-                            <p>Lot ID: {getLotId(img.id)}</p>
-                            <p>Wafer No: {getWaferNo(img.id)}</p>
-                            <p>Defect ID: {getDefectId(img.id)}</p>
-                            <p>Step: {getStepId(img.id)}</p>
-                          </div>
-                        ) : null}
-                      </li>
-                    ))}
-                  </StyleImages>
-                </div>
-              ))}
+              <HotKeys keyMap={keyMap} handlers={keyHandlers}>
+                {Object.keys(images).map(key => (
+                  <div key={key}>
+                    {images[key].length > 0 ? <h3>【{key}】</h3> : null}
+                    <StyleImages className={`col${columns}`}>
+                      {images[key].map((img, index) => (
+                        <li
+                          key={`${img.id}-${index}`}
+                          className={selected.includes(img.id) ? 'selected' : ''}
+                          onClick={() => this.onSelect(img.id, img.index, key)}
+                        >
+                          <LazyLoad height={200} offset={300} overflow={true}>
+                            <img src={`http://161.189.50.41${img.url}`} alt='' />
+                          </LazyLoad>
+                          {showLabel ? (
+                            <div className={`wafer-info font-size-${labelSize}`}>
+                              <p>Lot ID: {getLotId(img.id)}</p>
+                              <p>Wafer No: {getWaferNo(img.id)}</p>
+                              <p>Defect ID: {getDefectId(img.id)}</p>
+                              <p>Step: {getStepId(img.id)}</p>
+                            </div>
+                          ) : null}
+                        </li>
+                      ))}
+                    </StyleImages>
+                  </div>
+                ))}
+              </HotKeys>
             </StyleImagesGroup>
           </div>
           <div className='drawer common-drawer'>
@@ -449,9 +479,9 @@ class Manual extends React.Component {
               <h4 style={{ width: 80 }}>Infomation</h4>
               <h5>Hotkey Setting</h5>
               <ul>
-                {Object.keys(hotkeys).map(key => (
-                  <li key={key}>
-                    【{key}】： MB {hotkeys[key]}
+                {hotkeys.map(h => (
+                  <li key={h.key}>
+                    【{h.key}】： {h.code}
                   </li>
                 ))}
               </ul>
