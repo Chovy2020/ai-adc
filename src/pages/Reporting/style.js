@@ -12,21 +12,26 @@ export const StyleOverview = styled.div`
   margin: 0;
   padding: 10px;
   height: 320px;
-  border: 1px solid #ddd;
+  border:1px solid rgba(220,222,226,1);
+  border-radius: 2px;
 `
 
 export const StyleModelsMonitor = styled.div`
   margin: 20px 0;
   padding: 10px;
-  border: 1px solid #ddd;
+  border:1px solid rgba(220,222,226,1);
+  border-radius: 2px;
+  .filters{
+    color: rgba(25, 17, 11, 1);
+  }
 `
 
 export const StyleMonitor = styled(Row)`
   width: 100%;
   height: 400px;
   padding: 10px;
-  margin-top: 10px;
-  border-top: 1px solid #ddd;
+  margin-top: 30px;
+  // border-top: 1px solid #ddd;
   .ant-col-1 {
     display: flex;
     justify-content: center;
@@ -35,9 +40,11 @@ export const StyleMonitor = styled(Row)`
   }
   h3 {
     writing-mode: vertical-lr;
-    transform: rotate(180deg);
-    height: 250px;
-    text-align: center;
+    transform: rotate(180deg) translateY(50%);
+    // height: 250px;
+    position: absolute;
+    left: -10px;
+    top: 50%;
   }
   h4 {
     text-align: center;

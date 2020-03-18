@@ -59,3 +59,5 @@ export const COLUMNS = [
     key: 's'
   }
 ]
+
+export const PIE_COLORS = ['#76DDFB', '#2C82BE', '#DBECF8', '#53A8E2', '#2cbeb9', '#2cbe63', '#82be2c', '#bea42c', '#be602c', '#be3a2c']
