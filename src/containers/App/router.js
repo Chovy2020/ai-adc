@@ -17,26 +17,49 @@ import Reporting from '@/pages/Reporting/Loadable'
 // Account
 import Page404 from '@/pages/Account/404'
 
-const routes = {
-  '/': Home,
-  '/manual': Manual,
-  '/library': Library,
-  '/builder': Builder,
-  '/config': Config,
-  '/reporting': Reporting,
-  '/*': Page404
-}
+const MODULE_ROUTES = [
+  {
+    route: '/manual',
+    page: Manual
+  },
+  {
+    route: '/library',
+    page: Library
+  },
+  {
+    route: '/builder',
+    page: Builder
+  },
+  {
+    route: '/config',
+    page: Config
+  },
+  {
+    route: '/reporting',
+    page: Reporting
+  }
+]
+const STATIC_ROUTES = [
+  {
+    route: '/',
+    page: Home
+  },
+  {
+    route: '/*',
+    page: Page404
+  }
+]
+
 const modules = _.cloneDeep(MODULES)
 modules.unshift({
   title: 'Home',
   link: ''
 })
 
-const generateRoute = (route, key) => <Route key={key} exact={route === '/'} path={route} component={routes[route]} />
-
 class App extends React.Component {
   render() {
-    const { toolBoxLoading, activeMenu } = this.props
+    const { toolBoxLoading, activeMenu, customRoutes } = this.props
+    const routes = [...MODULE_ROUTES.filter(r => customRoutes.includes(r.route)), ...STATIC_ROUTES]
 
     return (
       <BrowserRouter>
@@ -57,7 +80,9 @@ class App extends React.Component {
         <Container>
           <Spin size='large' spinning={toolBoxLoading} style={{ height: 'calc(100vh - 50px)' }}>
             <Switch>
-              {Object.keys(routes).map((route, key) => generateRoute(route, key))}
+              {routes.map(r => (
+                <Route key={r.route} exact={r.route === '/'} path={r.route} component={r.page} />
+              ))}
               <Route exact path='' component={Home} />
               <Redirect form='/*' to='/404' />
             </Switch>
@@ -68,5 +93,9 @@ class App extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({ ...state.Init })
+const mapStateToProps = state => ({
+  toolBoxLoading: state.Init.toolBoxLoading,
+  activeMenu: state.Init.activeMenu,
+  customRoutes: state.Init.customRoutes
+})
 export default connect(mapStateToProps, {})(App)

@@ -3,7 +3,9 @@ const reducer = (
     shiftMultipleMode: false,
     activeMenu: '',
     toolBoxLoading: false,
-    classifyCodes: []
+    classifyCodes: [],
+    permissions: ['classification'],
+    customRoutes: ['/manual', '/library', '/builder', '/reporting', '/config']
   },
   action
 ) => {

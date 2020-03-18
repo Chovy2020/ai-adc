@@ -3,6 +3,7 @@ import _ from 'lodash'
 import LazyLoad from 'react-lazyload'
 import { HotKeys } from 'react-hotkeys'
 import { connect } from 'react-redux'
+import hasPermission from '@/components/hasPermission'
 import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, AutoComplete, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeToolboxLoading, changeMenu } from '@/utils/action'
@@ -31,6 +32,9 @@ import {
   StyleImagesGroup,
   StyleImages
 } from './style'
+
+
+const AuthButton = hasPermission(Button)
 
 class Manual extends React.Component {
   constructor(props) {
@@ -314,9 +318,9 @@ class Manual extends React.Component {
                 </Form.Item>
               ) : null}
               <Form.Item label=' '>
-                <Button onClick={this.onItemsLoad} type='primary'>
+                <AuthButton auth='classification' onClick={this.onItemsLoad} type='primary'>
                   Load
-                </Button>
+                </AuthButton>
                 <Button onClick={this.onItemsReset} type='dashed'>
                   Reset
                 </Button>
