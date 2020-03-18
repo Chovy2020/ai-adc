@@ -5,7 +5,7 @@ import { Row, Col, Button, Input, Checkbox, Select } from 'antd'
 import { changeMenu } from '@/utils/action'
 import { delay } from '@/utils/web'
 import { LIBRARY } from '@/pages/Builder/constant'
-import { TABLE_DATA } from './constant'
+import { TABLE_DATA, PIE_COLORS } from './constant'
 import {
   StyleReporting,
   StyleOverview,
@@ -94,21 +94,50 @@ class Reporting extends React.Component {
     await delay(1)
     const accuracyWeekChart = echarts.init(document.getElementById(`accuracy-week-${monitor.id}`))
     accuracyWeekChart.setOption({
+      tooltip: {
+        trigger: 'axis'
+      },
       xAxis: {
         type: 'category',
-        data: ['WWK1', 'WWK2', 'WWK3', 'WWK4', 'WWK5']
+        data: ['WWK1', 'WWK2', 'WWK3', 'WWK4', 'WWK5'],
+        axisLine: {
+          lineStyle: {
+            color: 'rgba(245, 247, 248, 1)'
+          }
+        },
+        axisLabel: {
+          textStyle: { color: '#666' }
+        }
       },
       yAxis: {
-        type: 'value'
+        type: 'value',
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          show: true,
+          lineStyle: {
+            color: 'rgba(245, 247, 248, 1)'
+          }
+        }
       },
       series: [
         {
           data: [12, 20, 15, 8, 7],
           type: 'bar',
-          label: {
+          barWidth: '60%',
+          itemStyle: {
             normal: {
-              show: true,
-              position: 'top'
+              color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
+                offset: 0,
+                color: 'rgba(39, 164, 73, 1)'
+              }, {
+                offset: 1,
+                color: 'rgba(39, 164, 73, .6)'
+              }], false)
             }
           }
         }
@@ -117,31 +146,132 @@ class Reporting extends React.Component {
     accuracyWeekChart.on('click', params => this.onBarChartClick('WEEK', monitor, params))
     const accuracyLotChart = echarts.init(document.getElementById(`accuracy-lot-${monitor.id}`))
     accuracyLotChart.setOption({
+      tooltip: {
+        trigger: 'axis'
+      },
       xAxis: {
         type: 'category',
-        data: ['Lot1', 'Lot2', 'Lot3', 'Lot4', 'Lot5']
+        data: ['Lot1', 'Lot2', 'Lot3', 'Lot4', 'Lot5'],
+        axisLine: {
+          lineStyle: {
+            color: 'rgba(245, 247, 248, 1)'
+          }
+        },
+        axisLabel: {
+          textStyle: { color: '#666' }
+        }
       },
       yAxis: {
-        type: 'value'
+        type: 'value',
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          show: true,
+          lineStyle: {
+            color: 'rgba(245, 247, 248, 1)'
+          }
+        }
       },
       series: [
         {
           data: [1, 3, 2, 4, 1],
           type: 'bar',
-          label: {
+          barWidth: '60%',
+          itemStyle: {
             normal: {
-              show: true,
-              position: 'top'
+              color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
+                offset: 0,
+                color: 'rgba(56, 158, 236, 1)'
+              }, {
+                offset: 1,
+                color: 'rgba(56, 158, 236, .6)'
+              }], false)
             }
           }
         }
       ]
     })
     accuracyLotChart.on('click', params => this.onBarChartClick('LOT', monitor, params))
+    // line chart
+    // const accuracyLineChart = echarts.init(document.getElementById(`accuracy-line-${monitor.id}`))
+    // accuracyLineChart.setOption({
+    //   tooltip: {
+    //     trigger: 'axis'
+    //   },
+    //   xAxis: {
+    //     type: 'category',
+    //     data: ['X1', 'X2', 'X3', 'X4', 'X5'],
+    //     axisLine: {
+    //       lineStyle: {
+    //         color: 'rgba(245, 247, 248, 1)'
+    //       }
+    //     },
+    //     axisLabel: {
+    //       textStyle: { color: '#666' }
+    //     }
+    //   },
+    //   yAxis: {
+    //     type: 'value',
+    //     axisLine: {
+    //       show: false
+    //     },
+    //     axisTick: {
+    //       show: false
+    //     },
+    //     splitLine: {
+    //       show: true,
+    //       lineStyle: {
+    //         color: 'rgba(245, 247, 248, 1)'
+    //       }
+    //     }
+    //   },
+    //   series: [
+    //     {
+    //       data: [1, 3, 2, 4, 1],
+    //       smooth: true,
+    //       type: 'line',
+    //       lineStyle: {
+    //         color: 'rgba(39, 164, 73, 1)'
+    //       },
+    //       itemStyle: {
+    //         color: 'rgba(39, 164, 73, 1)'
+    //       }
+    //     }
+    //   ]
+    // })
+    // accuracyLineChart.on('click', params => this.onBarChartClick('Line', monitor, params))
+    // // pie chart
+    // const accuracyPieChart = echarts.init(document.getElementById(`accuracy-pie-${monitor.id}`))
+    // accuracyPieChart.setOption({
+    //   color: PIE_COLORS,
+    //   legend: {
+    //     type: 'scroll',
+    //     bottom: 20,
+    //     data: ['P1', 'P2', 'P3', 'P4', 'P5']
+    //   },
+    //   series: [
+    //     {
+    //       name: 'pie',
+    //       type: 'pie',
+    //       radius: '45%',
+    //       center: ['50%', '50%'],
+    //       data: [{ value: 335, name: 'P1' },
+    //       { value: 310, name: 'P2' },
+    //       { value: 274, name: 'P3' },
+    //       { value: 235, name: 'P4' },
+    //       { value: 400, name: 'P5' }]
+    //     }
+    //   ]
+    // })
+    // accuracyPieChart.on('click', params => this.onBarChartClick('pie', monitor, params))
   }
 
   onBarChartClick = (type, monitor, params) => {
-    console.log('onBarChartClick', type, monitor, params.name)
+    console.log('onBarChartClick', type, monitor, params.name, params.data)
     this.setState({ visible: true })
   }
 
@@ -150,11 +280,13 @@ class Reporting extends React.Component {
     const { overviewChart1, overviewChart2, visible, images } = this.state
     if (overviewChart1)
       overviewChart1.setOption({
+        color: PIE_COLORS,
         tooltip: {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
         legend: {
+          icon: 'circle',
           position: 'center',
           data: ['Active', 'Pi-run', 'Disable']
         },
@@ -162,7 +294,7 @@ class Reporting extends React.Component {
           {
             name: '',
             type: 'pie',
-            radius: ['50%', '70%'],
+            radius: ['40%', '70%'],
             avoidLabelOverlap: false,
             label: {
               normal: {
@@ -186,11 +318,13 @@ class Reporting extends React.Component {
 
     if (overviewChart2)
       overviewChart2.setOption({
+        color: PIE_COLORS,
         tooltip: {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
         legend: {
+          icon: 'circle',
           position: 'center',
           data: ['Product A', 'Product B', 'Product C', 'Product D']
         },
@@ -198,7 +332,7 @@ class Reporting extends React.Component {
           {
             name: '',
             type: 'pie',
-            radius: ['50%', '70%'],
+            radius: ['40%', '70%'],
             avoidLabelOverlap: false,
             label: {
               normal: {
@@ -270,10 +404,11 @@ class Reporting extends React.Component {
           </div>
           {monitors.map(monitor => (
             <StyleMonitor key={monitor.id}>
-              <Col span={1}>
+              {/* <Col span={1}>
                 <h3>Step A ADC Model</h3>
-              </Col>
-              <Col span={7}>
+              </Col> */}
+              <Col span={8} style={{ paddingLeft: 15 }}>
+                <h3>Step A ADC Model</h3>
                 <h4>Overall Matrix</h4>
                 <StyleTable>
                   <thead>
@@ -306,6 +441,14 @@ class Reporting extends React.Component {
                 <h4>Accuracy% By Lot</h4>
                 <div style={{ width: '100%', height: 300 }} id={`accuracy-lot-${monitor.id}`} />
               </Col>
+              {/* <Col span={4}>
+                <h4>Line Chart</h4>
+                <div style={{ width: '100%', height: 300 }} id={`accuracy-line-${monitor.id}`} />
+              </Col>
+              <Col span={4}>
+                <h4>Pie Chart</h4>
+                <div style={{ width: '100%', height: 300 }} id={`accuracy-pie-${monitor.id}`} />
+              </Col> */}
             </StyleMonitor>
           ))}
         </StyleModelsMonitor>
