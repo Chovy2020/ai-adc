@@ -1,7 +1,7 @@
 import IconConfig from '@/assets/images/Config.png'
 import IconLibrary from '@/assets/images/Library.png'
 import IconBuilder from '@/assets/images/Builder.png'
-import IconManual from '@/assets/images/Manual.png'
+import IconClassification from '@/assets/images/Classification.png'
 import IconReporting from '@/assets/images/Reporting.png'
 // 菜单：链接、图片、标题
 export const MENUS = [
@@ -35,8 +35,8 @@ export const MENUS = [
 export const MODULES = [
   {
     title: 'Manual Classification',
-    link: 'manual',
-    icon: IconManual
+    link: 'classification',
+    icon: IconClassification
   },
   {
     title: 'Defect Library',

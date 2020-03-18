@@ -24,10 +24,10 @@ import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import Folder from '@/assets/images/folder.png'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
-// import { getClassifyCodes } from '@/pages/Manual/service'
+// import { getClassifyCodes } from '@/pages/Classification/service'
 import reducer from './reducer'
 import { PRE_TREATMENT, MODEL_TUNING, REJECT_MODEL, LIBRARY } from './constant'
-import { ITEMS_LIST } from '@/pages/Manual/constant'
+import { ITEMS_LIST } from '@/pages/Classification/constant'
 import { IMAGES_LIBRARY } from '@/pages/Library/constant'
 import {
   StyleBuilder,

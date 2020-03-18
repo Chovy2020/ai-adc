@@ -33,10 +33,9 @@ import {
   StyleImages
 } from './style'
 
-
 const AuthButton = hasPermission(Button)
 
-class Manual extends React.Component {
+class Classification extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -112,10 +111,10 @@ class Manual extends React.Component {
       keyHandlers: {}
     }
   }
-  
+
   // 初始化
   componentDidMount() {
-    this.props.changeMenu('manual')
+    this.props.changeMenu('classification')
     const { items } = this.state
     let itemsData = items.map(() => [])
     let itemsKeyword = items.map(() => '')
@@ -318,9 +317,9 @@ class Manual extends React.Component {
                 </Form.Item>
               ) : null}
               <Form.Item label=' '>
-                <AuthButton auth='classification' onClick={this.onItemsLoad} type='primary'>
+                <Button onClick={this.onItemsLoad} type='primary'>
                   Load
-                </AuthButton>
+                </Button>
                 <Button onClick={this.onItemsReset} type='dashed'>
                   Reset
                 </Button>
@@ -413,9 +412,14 @@ class Manual extends React.Component {
                 </Button>
                 <span style={{ margin: '0 5px 0 10px' }}>Hotkey:</span>
                 <Switch defaultChecked={hotkeyEnable} />
-                <Button size='small' onClick={this.onAddToLibrary} type='primary'>
+                <AuthButton
+                  auth='adc:classification:add_to_library'
+                  size='small'
+                  onClick={this.onAddToLibrary}
+                  type='primary'
+                >
                   Add to Library
-                </Button>
+                </AuthButton>
               </Form.Item>
             </Form>
             <StyleImagesGroup>
@@ -512,7 +516,7 @@ class Manual extends React.Component {
   }
 }
 
-injectReducer('Manual', reducer)
-const mapStateToProps = state => ({ ...state.Manual })
+injectReducer('Classification', reducer)
+const mapStateToProps = state => ({ ...state.Classification })
 const mapDispatchToProps = { changeToolboxLoading, changeMenu }
-export default connect(mapStateToProps, mapDispatchToProps)(Manual)
+export default connect(mapStateToProps, mapDispatchToProps)(Classification)

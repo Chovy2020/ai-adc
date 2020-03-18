@@ -8,7 +8,7 @@ import { MODULES } from '@/utils/constant'
 
 // ADC
 import Home from '@/pages'
-import Manual from '@/pages/Manual/Loadable'
+import Classification from '@/pages/Classification/Loadable'
 import Library from '@/pages/Library/Loadable'
 import Builder from '@/pages/Builder/Loadable'
 import Config from '@/pages/Config/Loadable'
@@ -19,8 +19,8 @@ import Page404 from '@/pages/Account/404'
 
 const MODULE_ROUTES = [
   {
-    route: '/manual',
-    page: Manual
+    route: '/classification',
+    page: Classification
   },
   {
     route: '/library',

@@ -4,8 +4,8 @@ const reducer = (
     activeMenu: '',
     toolBoxLoading: false,
     classifyCodes: [],
-    permissions: ['classification'],
-    customRoutes: ['/manual', '/library', '/builder', '/reporting', '/config']
+    permissions: ['adc:classification:view', 'adc:classification:add_to_library'],
+    customRoutes: ['/classification', '/library', '/builder', '/reporting', '/config']
   },
   action
 ) => {
