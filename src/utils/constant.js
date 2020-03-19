@@ -1,61 +1,55 @@
-import IconConfig from '@/assets/images/Config.png'
+// Module Component
+import Classification from '@/pages/Classification/Loadable'
+import Library from '@/pages/Library/Loadable'
+import Builder from '@/pages/Builder/Loadable'
+import Reporting from '@/pages/Reporting/Loadable'
+import Manage from '@/pages/Manage/Loadable'
+import Config from '@/pages/Config/Loadable'
+
+// Module Icon
+import IconClassification from '@/assets/images/Classification.png'
 import IconLibrary from '@/assets/images/Library.png'
 import IconBuilder from '@/assets/images/Builder.png'
-import IconClassification from '@/assets/images/Classification.png'
 import IconReporting from '@/assets/images/Reporting.png'
-// 菜单：链接、图片、标题
-export const MENUS = [
-  {
-    link: 'excursion',
-    icon: 'dashboard',
-    title: 'Excursion'
-  },
-  {
-    link: 'baseline',
-    icon: 'file-image',
-    title: 'Baseline Reporting'
-  },
-  {
-    link: 'toolbox',
-    icon: 'tool',
-    title: 'Toolbox'
-  },
-  {
-    link: 'adc',
-    icon: 'robot',
-    title: 'AI ADC'
-  },
-  {
-    link: 'setup',
-    icon: 'setting',
-    title: 'Setup'
-  }
-]
-// ADC入口页 模块列表
+import IconManage from '@/assets/images/Manage.png'
+import IconConfig from '@/assets/images/Config.png'
+
+// Module Route
 export const MODULES = [
   {
     title: 'Manual Classification',
-    link: 'classification',
-    icon: IconClassification
+    link: '/classification',
+    icon: IconClassification,
+    page: Classification
   },
   {
     title: 'Defect Library',
-    link: 'library',
-    icon: IconLibrary
+    link: '/library',
+    icon: IconLibrary,
+    page: Library
   },
   {
     title: 'ADC Builder',
-    link: 'builder',
-    icon: IconBuilder
+    link: '/builder',
+    icon: IconBuilder,
+    page: Builder
   },
   {
     title: 'Reporting',
-    link: 'reporting',
-    icon: IconReporting
+    link: '/reporting',
+    icon: IconReporting,
+    page: Reporting
   },
   {
-    title: 'Mgt & Config',
-    link: 'config',
-    icon: IconConfig
+    title: 'Management',
+    link: '/manage',
+    icon: IconManage,
+    page: Manage
+  },
+  {
+    title: 'Config',
+    link: '/config',
+    icon: IconConfig,
+    page: Config
   }
 ]

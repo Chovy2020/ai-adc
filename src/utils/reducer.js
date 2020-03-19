@@ -5,7 +5,7 @@ const reducer = (
     toolBoxLoading: false,
     classifyCodes: [],
     permissions: ['adc:classification:view', 'adc:classification:add_to_library'],
-    customRoutes: ['/classification', '/library', '/builder', '/reporting', '/config']
+    customRoutes: ['/classification', '/library', '/builder', '/reporting', '/manage', '/config']
   },
   action
 ) => {

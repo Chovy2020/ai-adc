@@ -6,46 +6,17 @@ import { Spin } from 'antd'
 import { Header, Logo, Container, StyleMenu } from './style'
 import { MODULES } from '@/utils/constant'
 
-// ADC
+// ADC Common Pages
 import Home from '@/pages'
-import Classification from '@/pages/Classification/Loadable'
-import Library from '@/pages/Library/Loadable'
-import Builder from '@/pages/Builder/Loadable'
-import Config from '@/pages/Config/Loadable'
-import Reporting from '@/pages/Reporting/Loadable'
-
-// Account
 import Page404 from '@/pages/Account/404'
 
-const MODULE_ROUTES = [
+const COMMON_ROUTES = [
   {
-    route: '/classification',
-    page: Classification
-  },
-  {
-    route: '/library',
-    page: Library
-  },
-  {
-    route: '/builder',
-    page: Builder
-  },
-  {
-    route: '/config',
-    page: Config
-  },
-  {
-    route: '/reporting',
-    page: Reporting
-  }
-]
-const STATIC_ROUTES = [
-  {
-    route: '/',
+    link: '/',
     page: Home
   },
   {
-    route: '/*',
+    link: '/*',
     page: Page404
   }
 ]
@@ -53,13 +24,13 @@ const STATIC_ROUTES = [
 const modules = _.cloneDeep(MODULES)
 modules.unshift({
   title: 'Home',
-  link: ''
+  link: '/'
 })
 
 class App extends React.Component {
   render() {
     const { toolBoxLoading, activeMenu, customRoutes } = this.props
-    const routes = [...MODULE_ROUTES.filter(r => customRoutes.includes(r.route)), ...STATIC_ROUTES]
+    const CUSTOM_ROUTES = [...MODULES.filter(route => customRoutes.includes(route.link)), ...COMMON_ROUTES]
 
     return (
       <BrowserRouter>
@@ -70,7 +41,7 @@ class App extends React.Component {
           <StyleMenu>
             {modules.map(m => (
               <li key={m.link}>
-                <Link className={activeMenu === m.link ? 'active' : ''} to={m.link}>
+                <Link className={`/${activeMenu}` === m.link ? 'active' : ''} to={m.link}>
                   {m.title}
                 </Link>
               </li>
@@ -80,8 +51,8 @@ class App extends React.Component {
         <Container>
           <Spin size='large' spinning={toolBoxLoading} style={{ height: 'calc(100vh - 50px)' }}>
             <Switch>
-              {routes.map(r => (
-                <Route key={r.route} exact={r.route === '/'} path={r.route} component={r.page} />
+              {CUSTOM_ROUTES.map(r => (
+                <Route key={r.link} exact={r.link === '/'} path={r.link} component={r.page} />
               ))}
               <Route exact path='' component={Home} />
               <Redirect form='/*' to='/404' />
