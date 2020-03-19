@@ -55,5 +55,5 @@
     "react-scripts": "^3.3.1",
     "redux-devtools-extension": "^2.13.8"
   },
-  "proxy": "http://161.189.50.41:9091"
+  "proxy": "http://192.168.2.82:8010"
 }
