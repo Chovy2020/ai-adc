@@ -1,9 +1,10 @@
 import axios from 'axios'
 import { message } from 'antd'
+import { delay } from './web'
 import store from './store'
 
 // 错误代码
-const ERROR_CODE = {
+const HTTP_ERROR_CODE = {
   400: '请求错误(400)',
   401: '未授权，请重新登录(401)',
   403: '拒绝访问(403)',
@@ -19,7 +20,7 @@ const ERROR_CODE = {
 }
 
 // 全局axios配置
-axios.defaults.baseURL = '/api'
+axios.defaults.baseURL = '/'
 axios.defaults.withCredentials = true
 axios.defaults.timeout = 30 * 60 * 1000
 
@@ -35,10 +36,8 @@ axios.interceptors.request.use(
       store.dispatch({ type: 'CHANGE_TOOLBOX_LOADING', payload: true })
     }, LOADING_DELAY)
     // 需要权限的接口的token验证
-    // const { token } = localStorage
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    const token = localStorage.getItem('AI_ADC_TOKEN')
+    if (token) config.headers.common.token = token
     return config
   },
   error => {
@@ -53,7 +52,7 @@ axios.interceptors.response.use(
     clearTimeout(timer)
     store.dispatch({ type: 'CHANGE_TOOLBOX_LOADING', payload: false })
     if (res && res.data) {
-      if (res.data.code === 200) return res.data.data
+      if (res.data.code === 20000) return res.data.data
       // 二进制流下载文件处理【'application/vnd.ms-excel'为MapGallery页面使用的特殊类型】
       if (['application/octet-stream', 'application/vnd.ms-excel'].includes(res.headers['content-type'])) {
         const blob = new Blob([res.data], { type: 'charset=utf-8' })
@@ -67,14 +66,20 @@ axios.interceptors.response.use(
         window.URL.revokeObjectURL(href) // 释放掉blob对象
         return Promise.resolve()
       }
-      message.error(ERROR_CODE[res.data.code] || '未知错误!')
-    } else console.log('服务器错误!')
+      if (res.data.code === 50000) message.error(res.data.message || '接口错误!')
+    } else message.error('服务器错误!')
     return Promise.reject()
   },
-  err => {
+  async err => {
     clearTimeout(timer)
     store.dispatch({ type: 'CHANGE_TOOLBOX_LOADING', payload: false })
-    message.error((err && err.response && ERROR_CODE[err.response.status]) || '连接服务器失败!')
+    if (err && err.response && err.response.status === 401) {
+      message.warning('登录已失效，请重新登录.')
+      await delay(1000)
+      window.location.href = '/login'
+      return
+    }
+    message.error((err && err.response && HTTP_ERROR_CODE[err.response.status]) || '连接服务器失败!')
     return Promise.reject(err)
   }
 )
@@ -94,6 +99,21 @@ export function get(url) {
 }
 
 /**
+ * delete
+ * @param {String} url
+ * @param {Object} data
+ * @returns {Promise}
+ */
+export function del(url, data) {
+  return new Promise(resolve => {
+    axios
+      .delete(url, data)
+      .then(res => resolve(res))
+      .catch(() => {})
+  })
+}
+
+/**
  * axios post请求 统一catch error
  * @param {String} url
  * @param {Object} data
@@ -103,6 +123,21 @@ export function post(url, data) {
   return new Promise(resolve => {
     axios
       .post(url, data)
+      .then(res => resolve(res))
+      .catch(() => {})
+  })
+}
+
+/**
+ * put
+ * @param {String} url
+ * @param {Object} data
+ * @returns {Promise}
+ */
+export function put(url, data) {
+  return new Promise(resolve => {
+    axios
+      .put(url, data)
       .then(res => resolve(res))
       .catch(() => {})
   })
