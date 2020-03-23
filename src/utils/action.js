@@ -18,3 +18,8 @@ export const changeShiftMultipleMode = payload => ({
   type: 'CHANGE_SHIFT_MULTIPLE_MODE',
   payload
 })
+// 获取用户信息
+export const changeUser = payload => ({
+  type: 'CHANGE_USER',
+  payload
+})

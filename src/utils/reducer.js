@@ -4,12 +4,18 @@ const reducer = (
     activeMenu: '',
     toolBoxLoading: false,
     classifyCodes: [],
-    permissions: ['adc:classification:view', 'adc:classification:add_to_library'],
-    customRoutes: ['/classification', '/library', '/builder', '/reporting', '/manage', '/config']
+    user: null,
+    permissions: []
   },
   action
 ) => {
   switch (action.type) {
+    case 'CHANGE_USER':
+      return {
+        ...state,
+        user: action.payload,
+        permissions: action.payload.buttons
+      }
     case 'CLASSIFY_CODES_INIT':
       return {
         ...state,

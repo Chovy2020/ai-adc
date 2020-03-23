@@ -10,6 +10,7 @@ const StyleContainer = styled.div`
   justify-content: center;
   align-items: center;
   background-color: #7eb8ec;
+  overflow: hidden;
 `
 
 class Page404 extends React.Component {

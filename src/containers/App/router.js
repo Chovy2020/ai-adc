@@ -3,11 +3,13 @@ import _ from 'lodash'
 import { connect } from 'react-redux'
 import { BrowserRouter, Route, Switch, Redirect, Link } from 'react-router-dom'
 import { Spin } from 'antd'
-import { Header, Logo, Container, StyleMenu } from './style'
+import { changeMenu, changeUser } from '@/utils/action'
+import { StyleHeader, StyleLogo, StyleContainer, StyleMenu } from './style'
 import { MODULES } from '@/utils/constant'
 
 // ADC Common Pages
 import Home from '@/pages'
+import Login from '@/pages/Account/Login/Loadable'
 import Page404 from '@/pages/Account/404'
 
 const COMMON_ROUTES = [
@@ -16,8 +18,8 @@ const COMMON_ROUTES = [
     page: Home
   },
   {
-    link: '/*',
-    page: Page404
+    link: '/login',
+    page: Login
   }
 ]
 
@@ -28,37 +30,71 @@ modules.unshift({
 })
 
 class App extends React.Component {
+  onChangeMenu = link => {
+    this.props.changeMenu(link.substr(1))
+  }
+
   render() {
-    const { toolBoxLoading, activeMenu, customRoutes } = this.props
-    const CUSTOM_ROUTES = [...MODULES.filter(route => customRoutes.includes(route.link)), ...COMMON_ROUTES]
+    const { toolBoxLoading, activeMenu } = this.props
+
+    let CUSTOM_MODULES = []
+    let user = localStorage.getItem('AI_ADC_USER')
+    let isLogged = true
+    if (user) {
+      user = JSON.parse(user)
+      let customRoutes = []
+      for (const str of user.buttons) {
+        const perm = str.split(':')
+        if (perm[2] === 'view' && !customRoutes.includes(perm[1])) {
+          customRoutes.push(perm[1])
+        }
+      }
+      customRoutes = customRoutes.map(route => `/${route}`)
+      CUSTOM_MODULES = MODULES.filter(route => customRoutes.includes(route.link))
+    } else isLogged = false
+
+    console.log('isLogged', isLogged, CUSTOM_MODULES.length)
 
     return (
       <BrowserRouter>
-        <Header>
+        <StyleHeader>
           <Link to='/'>
-            <Logo>AI ADC</Logo>
+            <StyleLogo>AI ADC</StyleLogo>
           </Link>
           <StyleMenu>
             {modules.map(m => (
               <li key={m.link}>
-                <Link className={`/${activeMenu}` === m.link ? 'active' : ''} to={m.link}>
+                <Link
+                  className={`/${activeMenu}` === m.link ? 'active' : ''}
+                  onClick={() => this.onChangeMenu(m.link)}
+                  to={m.link}
+                >
                   {m.title}
                 </Link>
               </li>
             ))}
           </StyleMenu>
-        </Header>
-        <Container>
-          <Spin size='large' spinning={toolBoxLoading} style={{ height: 'calc(100vh - 50px)' }}>
+        </StyleHeader>
+        <StyleContainer>
+          <Spin size='large' spinning={toolBoxLoading}>
             <Switch>
-              {CUSTOM_ROUTES.map(r => (
+              {COMMON_ROUTES.map(r => (
                 <Route key={r.link} exact={r.link === '/'} path={r.link} component={r.page} />
               ))}
-              <Route exact path='' component={Home} />
+              <Route path='/404' component={Page404} />
+              {isLogged ? (
+                <>
+                  {CUSTOM_MODULES.map(r => (
+                    <Route key={r.link} exact={r.link === '/'} path={r.link} component={r.page} />
+                  ))}
+                </>
+              ) : (
+                <Redirect to='/login' />
+              )}
               <Redirect form='/*' to='/404' />
             </Switch>
           </Spin>
-        </Container>
+        </StyleContainer>
       </BrowserRouter>
     )
   }
@@ -67,6 +103,7 @@ class App extends React.Component {
 const mapStateToProps = state => ({
   toolBoxLoading: state.Init.toolBoxLoading,
   activeMenu: state.Init.activeMenu,
-  customRoutes: state.Init.customRoutes
+  permissions: state.Init.permissions
 })
-export default connect(mapStateToProps, {})(App)
+const mapDispatchToProps = { changeMenu, changeUser }
+export default connect(mapStateToProps, mapDispatchToProps)(App)

@@ -42,15 +42,7 @@ const StyleModule = styled(Link)`
 `
 
 class ADC extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      msg: 'hello world',
-      num: 1
-    }
-  }
-
-  async componentDidMount() {
+  componentDidMount() {
     this.props.changeMenu('')
   }
 
@@ -72,5 +64,8 @@ class ADC extends React.Component {
   }
 }
 
+const mapStateToProps = state => ({
+  user: state.Init.user
+})
 const mapDispatchToProps = { changeMenu }
-export default connect(() => ({}), mapDispatchToProps)(ADC)
+export default connect(mapStateToProps, mapDispatchToProps)(ADC)

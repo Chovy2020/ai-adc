@@ -6,8 +6,6 @@ const mapStateToProps = state => ({
 })
 
 const checkAuth = (permissions, auth) => {
-  console.log('permissions', permissions)
-  console.log('auth', auth)
   return permissions.includes(auth)
 }
 
