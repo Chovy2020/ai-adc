@@ -46,13 +46,17 @@ class ADC extends React.Component {
     this.props.changeMenu('')
   }
 
+  onChangeMenu = link => {
+    this.props.changeMenu(link.substr(1))
+  }
+
   render() {
     return (
       <StyleModuleContainer>
         <ul>
           {MODULES.map(m => (
             <li key={m.title}>
-              <StyleModule to={m.link}>
+              <StyleModule to={m.link} onClick={() => this.onChangeMenu(m.link)}>
                 <img src={m.icon} alt='' />
                 <h3>{m.title}</h3>
               </StyleModule>

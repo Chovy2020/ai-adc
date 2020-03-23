@@ -37,7 +37,10 @@ axios.interceptors.request.use(
     }, LOADING_DELAY)
     // 需要权限的接口的token验证
     const token = localStorage.getItem('AI_ADC_TOKEN')
-    if (token) config.headers.common.token = token
+    if (token) {
+      config.headers.common.token = token
+      config.headers.common.DEV_MODEL = '086e71e25c58fd1425017d562c9d5e31'
+    }
     return config
   },
   error => {

@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { login, getUser } from './service'
 import { Form, Input, Button, Checkbox, message } from 'antd'
 import { changeMenu } from '@/utils/action'
-import { delay } from '@/utils/web'
+// import { delay } from '@/utils/web'
 import { StyleLogin } from './style'
 
 class Login extends React.Component {
@@ -19,6 +19,9 @@ class Login extends React.Component {
 
   componentDidMount() {
     this.props.changeMenu('login')
+    // 清除user
+    localStorage.removeItem('AI_ADC_TOKEN')
+    localStorage.removeItem('AI_ADC_USER')
   }
 
   handleSubmit = async e => {
@@ -36,7 +39,8 @@ class Login extends React.Component {
     localStorage.setItem('AI_ADC_TOKEN', res.token)
     const user = await getUser()
     localStorage.setItem('AI_ADC_USER', JSON.stringify(user))
-    await delay(1000)
+    // localStorage.setItem('AI_ADC_USER', JSON.stringify({buttons: ['adc:config:view']}))
+    // await delay(1000)
     this.props.history.replace('/')
   }
 

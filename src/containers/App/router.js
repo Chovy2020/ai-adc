@@ -2,9 +2,9 @@ import React from 'react'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 import { BrowserRouter, Route, Switch, Redirect, Link } from 'react-router-dom'
-import { Spin } from 'antd'
+import { Spin, Popover } from 'antd'
 import { changeMenu, changeUser } from '@/utils/action'
-import { StyleHeader, StyleLogo, StyleContainer, StyleMenu } from './style'
+import { StyleHeader, StyleLogo, StyleContainer, StyleMenu, StyleUser } from './style'
 import { MODULES } from '@/utils/constant'
 
 // ADC Common Pages
@@ -30,8 +30,24 @@ modules.unshift({
 })
 
 class App extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      user: null,
+      customModules: []
+    }
+  }
+
+  componentDidMount() {
+    this.onInit()
+  }
+
   onChangeMenu = link => {
     this.props.changeMenu(link.substr(1))
+  }
+
+  onInit = () => {
+    console.log('onInit')
   }
 
   render() {
@@ -51,6 +67,7 @@ class App extends React.Component {
       }
       customRoutes = customRoutes.map(route => `/${route}`)
       CUSTOM_MODULES = MODULES.filter(route => customRoutes.includes(route.link))
+      // CUSTOM_MODULES = CUSTOM_MODULES.filter((item, index) => index < 3)
     } else isLogged = false
 
     console.log('isLogged', isLogged, CUSTOM_MODULES.length)
@@ -74,6 +91,17 @@ class App extends React.Component {
               </li>
             ))}
           </StyleMenu>
+          <StyleUser>
+            {isLogged ? (
+              <Popover placement='bottomRight' content={<Link to='/login'>Logout</Link>} trigger='click'>
+                <b>{user.nickName}</b>
+              </Popover>
+            ) : (
+              <Link to='/login'>
+                <b>Login</b>
+              </Link>
+            )}
+          </StyleUser>
         </StyleHeader>
         <StyleContainer>
           <Spin size='large' spinning={toolBoxLoading}>

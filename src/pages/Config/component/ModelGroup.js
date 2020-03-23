@@ -3,7 +3,8 @@ import _ from 'lodash'
 import { Button, Form, Input, Table, message, Modal, AutoComplete, Select, List } from 'antd'
 // import { delay } from '@/utils/web'
 // import { SYSTEM_MODULES, ROLES } from './constant'
-import { StyleModelGroup, StyleHotkeys, StyleEditModal } from '../style'
+import { getGroups, getClassCodes, getHotkeys, updateGroup, addHotkey, updateHotkey, deleteGroup } from '../service'
+import { StyleModelGroup, StyleHotkeys, StyleEditModal, StyleGroupFilter } from '../style'
 
 const EditableContext = React.createContext()
 const EditableRow = ({ form, index, ...props }) => (
@@ -69,196 +70,32 @@ class ModelGroup extends React.Component {
       groupVisible: false,
       // hotkeys
       visible: false,
-      classCodes: ['0-No_Review', '1-FALSE', '2-Unknown', '278-MG_Replaced', '279-MG_Missing'], // ！通过接口获取
+      classCodes: [],
       classCode: '',
-      hotkeys: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+      hotkeys: [],
       hotkey: '',
-      hotkeyMapping: {
-        A: '0-No_Review',
-        B: '1-FALSE',
-        C: '2-Unknown'
-      }
+      hotkeyMapping: [],
+      addVisible: false,
+      addGroupName: ''
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    //groups
     this.loadGroups()
+    //classCodes
+    const classCodes = await getClassCodes()
+    this.setState({ classCodes })
+    //hotKey
+    const hotkeys = []
+    for (let i = 0; i < 26; i++) {
+      hotkeys.push(String.fromCharCode(65 + i))
+    }
+    this.setState({ hotkeys })
   }
   // 获取Groups
-  loadGroups = () => {
-    // call api ...
-    const groups = [
-      {
-        id: '1240366113942941696',
-        createTm: 1584590101089,
-        updateTm: 1584599751561,
-        remark: null,
-        groupName: 'test group update',
-        items: [
-          {
-            id: '1240366114081353728',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240366113942941696',
-            productId: 'product 001',
-            stepId: 'step 001'
-          },
-          {
-            id: '1240366114085548032',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240366113942941696',
-            productId: 'product 002',
-            stepId: 'step 002'
-          }
-        ]
-      },
-      {
-        id: '1240366787095166976',
-        createTm: 1584590261598,
-        updateTm: null,
-        remark: null,
-        groupName: 'test group 002',
-        items: [
-          {
-            id: '1240366787095166977',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240366787095166976',
-            productId: 'product 001',
-            stepId: 'step 001'
-          },
-          {
-            id: '1240366787099361280',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240366787095166976',
-            productId: 'product 002',
-            stepId: 'step 002'
-          }
-        ]
-      },
-      {
-        id: '1240446605266522112',
-        createTm: 1584609291732,
-        updateTm: null,
-        remark: null,
-        groupName: 'test group 003',
-        items: [
-          {
-            id: '1240446605266522113',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240446605266522112',
-            productId: 'product 001',
-            stepId: 'step 001'
-          },
-          {
-            id: '1240446605270716416',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240446605266522112',
-            productId: 'product 002',
-            stepId: 'step 002'
-          }
-        ]
-      },
-      {
-        id: '1240457046913101824',
-        createTm: 1584582981218,
-        updateTm: null,
-        remark: null,
-        groupName: 'test group 010',
-        items: [
-          {
-            id: '1240457046913101825',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240457046913101824',
-            productId: 'product 001',
-            stepId: 'step 001'
-          },
-          {
-            id: '1240457046913101826',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240457046913101824',
-            productId: 'product 002',
-            stepId: 'step 002'
-          }
-        ]
-      },
-      {
-        id: '1240459790617063424',
-        createTm: 1584583635368,
-        updateTm: null,
-        remark: null,
-        groupName: 'test group 011',
-        items: [
-          {
-            id: '1240459790617063425',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240459790617063424',
-            productId: 'product 001',
-            stepId: 'step 001'
-          },
-          {
-            id: '1240459790617063426',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240459790617063424',
-            productId: 'product 002',
-            stepId: 'step 002'
-          }
-        ]
-      },
-      {
-        id: '1240528031632764928',
-        createTm: 1584599905293,
-        updateTm: null,
-        remark: null,
-        groupName: 'test group insert',
-        items: []
-      },
-      {
-        id: '1240557326830690304',
-        createTm: 1584635689728,
-        updateTm: null,
-        remark: null,
-        groupName: 'test group 005',
-        items: [
-          {
-            id: '1240557327023628288',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240557326830690304',
-            productId: 'product 001',
-            stepId: 'step 001'
-          },
-          {
-            id: '1240557327032016896',
-            createTm: null,
-            updateTm: null,
-            remark: null,
-            groupId: '1240557326830690304',
-            productId: 'product 002',
-            stepId: 'step 002'
-          }
-        ]
-      }
-    ]
+  loadGroups = async () => {
+    const groups = await getGroups()
     for (const i in groups) {
       for (const j in groups[i].items) {
         groups[i].items[j].key = groups[i].items[j].id
@@ -267,9 +104,32 @@ class ModelGroup extends React.Component {
     this.setState({ groups })
   }
 
+  onSearch = keyword => {
+    console.log('search keyword', keyword)
+  }
+  onAddGroup = () => {
+    const { addGroupName } = this.state
+    if (addGroupName === '') {
+      message.warning('Group name is required')
+      return
+    }
+    this.setState({ addVisible: false })
+    // call api
+  }
+
   /* - - - - - - - - - - - - - - - - - - Groups - - - - - - - - - - - - - - - - - -  */
   // 修改Group热键
-  onGroupHotkey = group => {
+  onGroupHotkey = async group => {
+    const hotkeyMapping = await getHotkeys(group.id)
+    const { classCodes } = this.state
+    for (let index1 in hotkeyMapping) {
+      for (const index2 in classCodes) {
+        if (hotkeyMapping[index1].manualCodeId === classCodes[index2].id) {
+          hotkeyMapping[index1].remark = classCodes[index2].manualCode
+        }
+      }
+    }
+    this.setState({ hotkeyMapping: _.cloneDeep(hotkeyMapping) })
     this.setState({ group: _.cloneDeep(group), visible: true })
   }
   // 修改Group信息
@@ -277,27 +137,32 @@ class ModelGroup extends React.Component {
     this.setState({ group: _.cloneDeep(group), groupVisible: true })
   }
   // 删除Group
-  onGroupRemove = group => {
+  onGroupRemove = async group => {
     Modal.confirm({
       title: 'Are you absolutely sure?',
       content: `This action cannot be undone. This will permanently delete the group:【${group.groupName}】.`,
-      onOk() {
+      onOk: () => {
+        deleteGroup(group.id)
+        this.loadGroups()
         message.success('Delete successfully')
       }
     })
   }
+
   /* - - - - - - - - - - - - - - - - - - Group - - - - - - - - - - - - - - - - - -  */
   // Group修改后，保存
-  onGroupOk = () => {
+  onGroupOk = async () => {
+    await updateGroup(this.state.group.id, this.state.group)
     this.setState({ groupVisible: false })
-    // call api & update group detail
     message.success('Save successfully')
+    await this.loadGroups()
   }
   // 添加Group表格行
   handleInsert = () => {
     const { group } = this.state
     group.items.push({
       key: `Temp-${new Date().getTime()}`,
+      groupId: group.id,
       productId: 'Product Id',
       stepId: 'Step Id'
     })
@@ -305,7 +170,16 @@ class ModelGroup extends React.Component {
   }
   // 删除Group表格行
   handleDelete = row => {
-    // ...
+    const { group } = this.state
+    if (group.items.length > 0) {
+      for (let i = 0; i < group.items.length; i++) {
+        if (row === group.items[i]) {
+          group.items.splice(i, 1)
+          i--
+        }
+      }
+      this.setState({ group: _.cloneDeep(group) })
+    }
   }
   // 保存Group表格行
   handleSave = row => {
@@ -321,24 +195,45 @@ class ModelGroup extends React.Component {
   /* - - - - - - - - - - - - - - - - - - Hotkeys - - - - - - - - - - - - - - - - - -  */
   // 添加或修改热键
   onAssignHotkey = () => {
-    const { hotkeyMapping, hotkey, classCode } = this.state
-    hotkeyMapping[hotkey] = classCode
+    const { hotkeyMapping, hotkey, classCode, group } = this.state
+    const code = classCode.split('~')
+    hotkeyMapping.push({
+      id: null,
+      hotkey: hotkey,
+      manualCodeId: code[1],
+      remark: code[0],
+      groupId: group.id
+    })
     this.setState({ hotkeyMapping })
   }
   // 删除热键
   onDeleteHotkey = key => {
     const { hotkeyMapping } = this.state
-    delete hotkeyMapping[key]
+    for (let i = 0; i < hotkeyMapping.length; i++) {
+      if (hotkeyMapping[i].hotkey === key) {
+        hotkeyMapping.splice(i, 1)
+        i--
+      }
+    }
     this.setState({ hotkeyMapping })
   }
   // 保存热键
-  onHotkeyOk = () => {
+  onHotkeyOk = async () => {
+    const { hotkeyMapping } = this.state
+    for (const index in hotkeyMapping) {
+      hotkeyMapping[index].remark = null
+      if (hotkeyMapping[index].id === null) {
+        await addHotkey(hotkeyMapping[index])
+      } else {
+        await updateHotkey(hotkeyMapping[index].id, hotkeyMapping[index])
+      }
+    }
     this.setState({ visible: false })
     message.success('Hotkeys save successfully')
   }
 
   render() {
-    const { groups, group, groupVisible } = this.state
+    const { groups, group, groupVisible, addVisible } = this.state
     const { visible, classCodes, classCode, hotkeys, hotkey, hotkeyMapping } = this.state
 
     const COMPONENTS = {
@@ -411,6 +306,12 @@ class ModelGroup extends React.Component {
 
     return (
       <StyleModelGroup>
+        <StyleGroupFilter>
+          <Input.Search enterButton placeholder='input search text' onSearch={this.onSearch} />
+          <Button type='primary' onClick={() => this.setState({ addVisible: true })}>
+            Add Group
+          </Button>
+        </StyleGroupFilter>
         <Table size='small' rowKey='id' pagination={false} columns={COLUMNS} dataSource={groups} />
         <Modal
           title='Hotkey Setup'
@@ -436,20 +337,23 @@ class ModelGroup extends React.Component {
               size='small'
               filterOption={true}
               defaultValue={classCode}
-              dataSource={classCodes}
-              style={{ width: 150 }}
+              style={{ width: 200 }}
               onSelect={classCode => this.setState({ classCode })}
-            />
+            >
+              {classCodes.map(code => (
+                <AutoComplete.Option key={code.manualCode + '~' + code.id}>{code.manualCode}</AutoComplete.Option>
+              ))}
+            </AutoComplete>
             <Button type='primary' size='small' onClick={this.onAssignHotkey} style={{ marginLeft: 10 }}>
               Assign
             </Button>
           </StyleHotkeys>
           <List
             itemLayout='horizontal'
-            dataSource={Object.keys(hotkeyMapping)}
+            dataSource={hotkeyMapping}
             renderItem={key => (
-              <List.Item actions={[<span onClick={() => this.onDeleteHotkey(key)}>Delete</span>]}>
-                {`${key} - ${hotkeyMapping[key]}`}
+              <List.Item actions={[<span onClick={() => this.onDeleteHotkey(key.hotkey)}>Delete</span>]}>
+                {`${key.hotkey} - ${key.remark}`}
               </List.Item>
             )}
           />
@@ -482,6 +386,15 @@ class ModelGroup extends React.Component {
             </>
           )}
         </StyleEditModal>
+        <Modal
+          title='Add Model Group'
+          visible={addVisible}
+          onOk={this.onAddGroup}
+          onCancel={() => this.setState({ addVisible: false })}
+        >
+          <span>Group Name:</span>
+          <Input style={{ width: 370, marginLeft: 10 }} onChange={e => this.setState({ addGroupName: e.target.value })} />
+        </Modal>
       </StyleModelGroup>
     )
   }

@@ -45,3 +45,18 @@ export const StyleMenu = styled.ul`
     }
   }
 `
+
+export const StyleUser = styled.div`
+  flex: 1;
+  text-align: right;
+  b {
+    color: #00f;
+    :hover {
+      cursor: pointer;
+    }
+  }
+`
+export const StyleLayout = styled.div`
+  width: 100%;
+  height: 100%;
+`

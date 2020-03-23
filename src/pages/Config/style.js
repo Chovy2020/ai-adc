@@ -29,3 +29,16 @@ export const StyleEditModal = styled(Modal)`
     padding: 20px 20px 10px;
   }
 `
+
+export const StyleGroupFilter = styled.div`
+  width: 100%;
+  text-align: right;
+  margin-bottom: 10px;
+  .ant-input-search {
+    width: 200px;
+    margin-right: 20px;
+    .ant-btn {
+      min-width: 20px;
+    }
+  }
+`
