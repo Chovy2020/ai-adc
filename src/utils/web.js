@@ -4,6 +4,13 @@ import _ from 'lodash'
 // 延时
 export const delay = timeout => new Promise(reslove => setTimeout(reslove, timeout))
 
+// 互换
+export const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list)
+  const [removed] = result.splice(startIndex, 1)
+  result.splice(endIndex, 0, removed)
+  return result
+}
 // 打印当前时间(微秒)
 export const printTime = (sign = '') => {
   console.log(sign, `${moment(new Date()).second()}-${moment(new Date()).millisecond()}`)

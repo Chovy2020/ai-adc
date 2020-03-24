@@ -70,7 +70,7 @@ class App extends React.Component {
       // CUSTOM_MODULES = CUSTOM_MODULES.filter((item, index) => index < 3)
     } else isLogged = false
 
-    console.log('isLogged', isLogged, CUSTOM_MODULES.length)
+    // console.log('isLogged', isLogged, CUSTOM_MODULES.length)
 
     return (
       <BrowserRouter>
@@ -78,30 +78,28 @@ class App extends React.Component {
           <Link to='/'>
             <StyleLogo>AI ADC</StyleLogo>
           </Link>
-          <StyleMenu>
-            {modules.map(m => (
-              <li key={m.link}>
-                <Link
-                  className={`/${activeMenu}` === m.link ? 'active' : ''}
-                  onClick={() => this.onChangeMenu(m.link)}
-                  to={m.link}
-                >
-                  {m.title}
-                </Link>
-              </li>
-            ))}
-          </StyleMenu>
-          <StyleUser>
-            {isLogged ? (
-              <Popover placement='bottomRight' content={<Link to='/login'>Logout</Link>} trigger='click'>
-                <b>{user.nickName}</b>
-              </Popover>
-            ) : (
-              <Link to='/login'>
-                <b>Login</b>
-              </Link>
-            )}
-          </StyleUser>
+          {isLogged ? (
+            <>
+              <StyleMenu>
+                {modules.map(m => (
+                  <li key={m.link}>
+                    <Link
+                      className={`/${activeMenu}` === m.link ? 'active' : ''}
+                      onClick={() => this.onChangeMenu(m.link)}
+                      to={m.link}
+                    >
+                      {m.title}
+                    </Link>
+                  </li>
+                ))}
+              </StyleMenu>
+              <StyleUser>
+                <Popover placement='bottomRight' content={<Link to='/login'>Logout</Link>} trigger='click'>
+                  <b>{user.nickName}</b>
+                </Popover>
+              </StyleUser>
+            </>
+          ) : null}
         </StyleHeader>
         <StyleContainer>
           <Spin size='large' spinning={toolBoxLoading}>

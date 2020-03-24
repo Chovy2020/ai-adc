@@ -15,6 +15,30 @@ export const ITEMS_LIST = [
   'Slot Id',
   'Group Id'
 ]
+export const ITEMS_MAPPING = {
+  'Product Id': 'PRODUCT_ID',
+  'Step Id': 'STEP_ID',
+  'Lot Id': 'LOT_ID',
+  'Wafer Id': 'WAFER_NO',
+  'Scan Time/Date': 'SCAN_TM',
+  'Inspect Equip Id': 'EQP_ID',
+  'Recipe Id': 'RECIPE_ID',
+  'Test Id': 'TEST_NO',
+  'Slot Id': 'SLOT_NUM',
+  'Group Id': 'GROUP_ID'
+}
+export const ITEMS_MAPPING_2 = {
+  'Product Id': 'productIds',
+  'Step Id': 'stepIds',
+  'Lot Id': 'lotIds',
+  'Wafer Id': 'waferIds',
+  'Inspect Equip Id': 'inspectors',
+  'Recipe Id': 'recipeIds',
+  'Scan Time/Date': 'scanDates',
+  'Test Id': 'testIds',
+  'Slot Id': 'sLotIds',
+  'Group Id': 'groupIds'
+}
 // 分类列表
 export const CATEGORY_TYPES = [
   ['Manual Bin', 'MB'],
@@ -23,15 +47,15 @@ export const CATEGORY_TYPES = [
 ]
 // groups 列表
 export const VIEW_GROUPS = [
-  ['Manual Bin', 'MB'],
-  ['Rough Bin', 'RB'],
-  ['ADC Bin', 'ADC'],
-  ['Lot Id', 'LotId'],
-  ['Wafer Id', 'WaferId'],
-  ['Step Id', 'StepId'],
-  ['Product Id', 'ProductId'],
-  ['scan time', 'ScanTime'],
-  ['review time', 'ReviewTime']
+  ['Manual Bin', 'MAN_BIN'],
+  ['Rough Bin', 'ROUGH_BIN'],
+  ['ADC Bin', 'ADC_BIN'],
+  ['Lot Id', 'LOT_ID'],
+  ['Wafer Id', 'WAFER_NO'],
+  ['Step Id', 'STEP_ID'],
+  ['Product Id', 'PRODUCT_ID'],
+  ['scan time', 'SCAN_TM'],
+  ['review time', 'REVIEW_TM']
 ]
 // 图片上信息显示
 export const getLotId = waferId => waferId.split('|')[0]

@@ -1,7 +1,8 @@
 import { post } from '@/utils/api'
 
 // DataQuery: itemsData
-export const getItemsData = data => post('manual/data_query', data)
+export const getItemsData = ({ pageNo, pageSize, data }) =>
+  post(`manual/classify/page/filter/params/${pageNo}/${pageSize}`, data)
 
 // Utilization: filters
 export const getViewFilters = data => post('manual/gallery_image_classify_group', data)

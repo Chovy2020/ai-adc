@@ -25,7 +25,7 @@ axios.defaults.withCredentials = true
 axios.defaults.timeout = 30 * 60 * 1000
 
 // 超过LOADING_DELAY时间，才显示Loading
-const LOADING_DELAY = 200
+const LOADING_DELAY = 400
 let timer = null
 
 // http request 拦截器

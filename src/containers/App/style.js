@@ -22,7 +22,7 @@ export const StyleLogo = styled.div`
 `
 
 export const StyleContainer = styled.div`
-  .ant-spin-container {
+  & > .ant-spin-nested-loading > .ant-spin-container {
     height: calc(100vh - 50px);
   }
 `

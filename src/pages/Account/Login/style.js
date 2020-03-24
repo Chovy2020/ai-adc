@@ -10,6 +10,7 @@ export const StyleLogin = styled.div`
   form {
     width: 300px;
     height: 300px;
+    margin-top: -50px;
   }
   button {
     width: 100%;

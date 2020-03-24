@@ -7,13 +7,16 @@ import hasPermission from '@/components/hasPermission'
 import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, AutoComplete, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeToolboxLoading, changeMenu } from '@/utils/action'
-import { delay } from '@/utils/web'
+import { delay, reorder } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
+import { getItemsData } from './service'
 import {
   LAYOUT_SIZE,
   FONT_SIZE,
   ITEMS_LIST,
+  ITEMS_MAPPING,
+  ITEMS_MAPPING_2,
   CATEGORY_TYPES,
   VIEW_GROUPS,
   getLotId,
@@ -115,28 +118,82 @@ class Classification extends React.Component {
   // 初始化
   componentDidMount() {
     this.props.changeMenu('classification')
-    const { items } = this.state
-    let itemsData = items.map(() => [])
-    let itemsKeyword = items.map(() => '')
-    let itemsSelected = items.map(() => [])
-    itemsData = [
-      ['Device01', 'Device02', 'Device03', 'Device04'],
-      ['M1_CMP', 'M2_CMP', 'M3_CMP'],
-      ['F0002.000', 'F0001.000'],
-      ['1', '2'],
-      ['g001', 'g002']
-    ]
-    itemsSelected = [['Device02'], ['M1_CMP'], ['F0002.000', 'F0001.000'], ['1', '2'], ['g002']]
-    itemsKeyword[1] = 'm1'
-    this.setState({ itemsData, itemsKeyword, itemsSelected })
+    this.onItemsReset()
     this.generateKeyMapAndHandlers()
   }
   // 修改时间
   onDatePickerChange = (dates, time) => {
     this.setState({ time })
   }
+  search = async index => {
+    const { items, itemsSelected, itemsKeyword } = this.state
+    const params = {
+      pageNo: 1,
+      pageSize: 1000
+    }
+    const data = {
+      keywords: itemsKeyword[index],
+      targetField: ITEMS_MAPPING[items[index]]
+    }
+    if (index > 0) {
+      for (let i = 0; i < index; i++) {
+        if (itemsSelected[i].length === 0) return []
+        data[ITEMS_MAPPING_2[items[i]]] = itemsSelected[i]
+      }
+    }
+    params.data = data
+    return await getItemsData(params)
+  }
   // - - - - - - - - - - - - - - - - - - Drag - - - - - - - - - - - - - - - - - -
-  onItemsSearch = index => {}
+  // 获取列数据
+  onSearch = async index => {
+    const res = await this.search(index)
+    const { items, itemsData, itemsSelected, itemsKeyword } = this.state
+    itemsData[index] = res
+    // 清空后续列表, 和当前列mark
+    for (const i in items) {
+      if (i > index) {
+        itemsData[i] = []
+        itemsKeyword[i] = ''
+      }
+      if (i >= index) itemsSelected[i] = []
+    }
+    this.setState({ itemsData, itemsKeyword, itemsSelected })
+  }
+  // 标记
+  onMark = async index => {
+    const res = await this.search(index)
+    // 如果跳跃列选择，待选择列表为空，补充搜索结果进待选择列表
+    const { items, itemsData, itemsSelected } = this.state
+    if (itemsData[index].length === 0 && res.length > 0) {
+      console.log('初始数据为空，Mark却有数据！')
+      itemsData[index] = res
+      this.setState({ itemsData })
+    }
+    itemsSelected[index] = res
+    this.setState({ itemsSelected })
+    // 加载下一列
+    if (index < items.length - 1) this.onSearch(index + 1)
+  }
+  // 拖拽事件完成回调
+  onDragEnd = result => {
+    // dropped outside the list
+    if (!result.destination) return
+    const source = result.source.index
+    const destination = result.destination.index
+    const min = Math.min(source, destination)
+    const { items, itemsKeyword } = this.state
+    this.setState(
+      {
+        items: reorder(items, source, destination),
+        itemsKeyword: reorder(itemsKeyword, source, destination)
+      },
+      () => {
+        if (min === 0) this.onItemsReset()
+        else this.onSearch(min)
+      }
+    )
+  }
   // 点击选择高亮
   onItemsSelect = (i, text) => {
     const { items, itemsSelected } = this.state
@@ -144,7 +201,7 @@ class Classification extends React.Component {
     else itemsSelected[i].push(text)
     this.setState({ itemsSelected })
     // 更新下一列的数据
-    if (i < items.length - 1) this.onItemsSearch(i + 1)
+    if (i < items.length - 1) this.onSearch(i + 1)
   }
   onItemsInput = (i, v) => {
     const { itemsKeyword } = this.state
@@ -167,7 +224,16 @@ class Classification extends React.Component {
     await this.loadImages()
     this.setState({ dataQueryVisible: false })
   }
-  onItemsReset = () => {}
+  // Items初始化
+  onItemsReset = () => {
+    const { items } = this.state
+    this.setState({
+      itemData: items.map(() => []),
+      itemSelected: items.map(() => []),
+      itemKeyword: items.map(() => '')
+    })
+    this.onSearch(0)
+  }
   // - - - - - - - - - - - - - - - - - - Classified - - - - - - - - - - - - - - - - - -
   onClassifiedOk = params => {
     if (typeof params === 'string') {
@@ -242,7 +308,7 @@ class Classification extends React.Component {
   onFilterSubmit = () => {
     this.loadImages()
   }
-
+  // 生成热键、热键绑定事件
   generateKeyMapAndHandlers = () => {
     const { hotkeys } = this.state
     const keyMap = {}
@@ -289,7 +355,7 @@ class Classification extends React.Component {
                                     <Input.Search
                                       value={itemsKeyword[index]}
                                       onChange={e => this.onItemsInput(index, e.target.value)}
-                                      // onSearch={() => this.onSearchMark(index)}
+                                      onSearch={() => this.onMark(index)}
                                       size='small'
                                       enterButton
                                     />
