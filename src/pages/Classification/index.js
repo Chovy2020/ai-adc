@@ -95,7 +95,7 @@ class Classification extends React.Component {
       // selected
       images: [],
       selected: [],
-      hotkeyEnable: true,
+      hotkeyEnable: false,
       hotkeys: [
         {
           key: 'A',
@@ -223,6 +223,20 @@ class Classification extends React.Component {
   onItemsLoad = async () => {
     await this.loadImages()
     this.setState({ dataQueryVisible: false })
+    // 加载完图片，再加载热键
+    const { items, itemsSelected } = this.state
+    let hotkeyEnable = false
+    if (items.includes('Group Id')) {
+      for (const i in items) {
+        if (items[i] === 'Group Id' && itemsSelected[i].length === 1) {
+          hotkeyEnable = true
+        }
+      }
+    }
+    if (hotkeyEnable) {
+      // call api get hotkeys
+    }
+    this.setState({ hotkeyEnable })
   }
   // Items初始化
   onItemsReset = () => {
@@ -260,6 +274,9 @@ class Classification extends React.Component {
     }
     this.setState({ selected: [] })
     message.success('Add to library succeeded')
+  }
+  onHotkeyEnableChange = hotkeyEnable => {
+    this.setState({ hotkeyEnable })
   }
   // - - - - - - - - - - - - - - - - - - Images - - - - - - - - - - - - - - - - - -
   // 获取图片链接的列表 + 过滤
@@ -477,7 +494,7 @@ class Classification extends React.Component {
                   Reset
                 </Button>
                 <span style={{ margin: '0 5px 0 10px' }}>Hotkey:</span>
-                <Switch defaultChecked={hotkeyEnable} />
+                <Switch checked={hotkeyEnable} onChange={this.onHotkeyEnableChange} />
                 <AuthButton
                   auth='adc:classification:add_to_library'
                   size='small'
@@ -553,14 +570,18 @@ class Classification extends React.Component {
             </section>
             <section className='info'>
               <h4 style={{ width: 80 }}>Infomation</h4>
-              <h5>Hotkey Setting</h5>
-              <ul>
-                {hotkeys.map(h => (
-                  <li key={h.key}>
-                    【{h.key}】： {h.code}
-                  </li>
-                ))}
-              </ul>
+              {hotkeyEnable ? (
+                <>
+                  <h5>Hotkey Setting</h5>
+                  <ul>
+                    {hotkeys.map(h => (
+                      <li key={h.key}>
+                        【{h.key}】： {h.code}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
               <h5>ADC Module Infomation</h5>
               <table>
                 <tbody>
