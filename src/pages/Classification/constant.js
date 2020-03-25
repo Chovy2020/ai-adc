@@ -2,7 +2,7 @@
 export const LAYOUT_SIZE = [3, 4, 5, 6]
 // 字体大小
 export const FONT_SIZE = ['12', '14', '16', '18']
-
+// 拖拽框列表
 export const ITEMS_LIST = [
   'Product Id',
   'Step Id',
@@ -15,6 +15,7 @@ export const ITEMS_LIST = [
   'Slot Id',
   'Group Id'
 ]
+// 拖拽框对应数据库字段
 export const ITEMS_MAPPING = {
   'Product Id': 'PRODUCT_ID',
   'Step Id': 'STEP_ID',
@@ -27,6 +28,7 @@ export const ITEMS_MAPPING = {
   'Slot Id': 'SLOT_NUM',
   'Group Id': 'GROUP_ID'
 }
+// 拖拽框对应接口字段
 export const ITEMS_MAPPING_2 = {
   'Product Id': 'productIds',
   'Step Id': 'stepIds',

@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { Button, Form, Input, Table, message, Modal, AutoComplete, Select, List } from 'antd'
 // import { delay } from '@/utils/web'
 // import { SYSTEM_MODULES, ROLES } from './constant'
-import { getGroups, getClassCodes, getHotkeys, updateGroup, addHotkey, updateHotkey, deleteGroup } from '../service'
+import { getGroups, getClassCodes, getHotkeys, updateGroup, updateHotkeyList,addGroup, deleteGroup } from '../service'
 import { StyleModelGroup, StyleHotkeys, StyleEditModal, StyleGroupFilter } from '../style'
 
 const EditableContext = React.createContext()
@@ -107,7 +107,7 @@ class ModelGroup extends React.Component {
   onSearch = keyword => {
     console.log('search keyword', keyword)
   }
-  onAddGroup = () => {
+  onAddGroup = async () => {
     const { addGroupName } = this.state
     if (addGroupName === '') {
       message.warning('Group name is required')
@@ -115,6 +115,13 @@ class ModelGroup extends React.Component {
     }
     this.setState({ addVisible: false })
     // call api
+    const addData={
+      groupName:addGroupName,
+      productId:'',
+      stepId:''
+    }
+    await addGroup(addData)
+    this.loadGroups()
   }
 
   /* - - - - - - - - - - - - - - - - - - Groups - - - - - - - - - - - - - - - - - -  */
@@ -125,7 +132,7 @@ class ModelGroup extends React.Component {
     for (let index1 in hotkeyMapping) {
       for (const index2 in classCodes) {
         if (hotkeyMapping[index1].manualCodeId === classCodes[index2].id) {
-          hotkeyMapping[index1].remark = classCodes[index2].manualCode
+          hotkeyMapping[index1].remark = classCodes[index2].manualName
         }
       }
     }
@@ -137,12 +144,12 @@ class ModelGroup extends React.Component {
     this.setState({ group: _.cloneDeep(group), groupVisible: true })
   }
   // 删除Group
-  onGroupRemove = async group => {
+  onGroupRemove = group => {
     Modal.confirm({
       title: 'Are you absolutely sure?',
       content: `This action cannot be undone. This will permanently delete the group:【${group.groupName}】.`,
-      onOk: () => {
-        deleteGroup(group.id)
+      onOk: async () => {
+        await deleteGroup(group.id)
         this.loadGroups()
         message.success('Delete successfully')
       }
@@ -152,10 +159,11 @@ class ModelGroup extends React.Component {
   /* - - - - - - - - - - - - - - - - - - Group - - - - - - - - - - - - - - - - - -  */
   // Group修改后，保存
   onGroupOk = async () => {
-    await updateGroup(this.state.group.id, this.state.group)
     this.setState({ groupVisible: false })
+    const { group } =this.state
+    await updateGroup(group.id,group)
     message.success('Save successfully')
-    await this.loadGroups()
+    this.loadGroups()
   }
   // 添加Group表格行
   handleInsert = () => {
@@ -175,7 +183,7 @@ class ModelGroup extends React.Component {
       for (let i = 0; i < group.items.length; i++) {
         if (row === group.items[i]) {
           group.items.splice(i, 1)
-          i--
+          break
         }
       }
       this.setState({ group: _.cloneDeep(group) })
@@ -195,15 +203,25 @@ class ModelGroup extends React.Component {
   /* - - - - - - - - - - - - - - - - - - Hotkeys - - - - - - - - - - - - - - - - - -  */
   // 添加或修改热键
   onAssignHotkey = () => {
-    const { hotkeyMapping, hotkey, classCode, group } = this.state
-    const code = classCode.split('~')
-    hotkeyMapping.push({
-      id: null,
-      hotkey: hotkey,
-      manualCodeId: code[1],
-      remark: code[0],
-      groupId: group.id
-    })
+    const { hotkeyMapping, hotkey, classCode } = this.state
+    const code=classCode.split('~')
+    let isAdd=true
+    if(hotkeyMapping.length >0){
+      for(const index in hotkeyMapping){
+        if(hotkeyMapping[index].hotkey === hotkey ){
+          isAdd = false
+          hotkeyMapping[index].manualCodeId=code[1]
+          hotkeyMapping[index].remark=code[0]
+        }
+      }
+    }
+    if(isAdd){
+      hotkeyMapping.push({
+        hotkey:hotkey,
+        manualCodeId:code[1],
+        remark:code[0]
+      })
+    }
     this.setState({ hotkeyMapping })
   }
   // 删除热键
@@ -212,23 +230,24 @@ class ModelGroup extends React.Component {
     for (let i = 0; i < hotkeyMapping.length; i++) {
       if (hotkeyMapping[i].hotkey === key) {
         hotkeyMapping.splice(i, 1)
-        i--
+        break
       }
     }
     this.setState({ hotkeyMapping })
   }
   // 保存热键
   onHotkeyOk = async () => {
-    const { hotkeyMapping } = this.state
-    for (const index in hotkeyMapping) {
-      hotkeyMapping[index].remark = null
-      if (hotkeyMapping[index].id === null) {
-        await addHotkey(hotkeyMapping[index])
-      } else {
-        await updateHotkey(hotkeyMapping[index].id, hotkeyMapping[index])
-      }
+    this.setState({ visible: false})
+    const {hotkeyMapping,group}=this.state
+    console.log("map,group",hotkeyMapping,group)
+    for(const index in hotkeyMapping){
+      hotkeyMapping[index].remark=null;
     }
-    this.setState({ visible: false })
+    const updateData={
+      groupId:group.id,
+      hotkeys:hotkeyMapping
+    }
+    await updateHotkeyList(updateData)
     message.success('Hotkeys save successfully')
   }
 
@@ -341,7 +360,7 @@ class ModelGroup extends React.Component {
               onSelect={classCode => this.setState({ classCode })}
             >
               {classCodes.map(code => (
-                <AutoComplete.Option key={code.manualCode + '~' + code.id}>{code.manualCode}</AutoComplete.Option>
+                <AutoComplete.Option key={code.id} value={code.manualName +"~"+ code.id}>{code.manualName}</AutoComplete.Option>
               ))}
             </AutoComplete>
             <Button type='primary' size='small' onClick={this.onAssignHotkey} style={{ marginLeft: 10 }}>
@@ -351,9 +370,9 @@ class ModelGroup extends React.Component {
           <List
             itemLayout='horizontal'
             dataSource={hotkeyMapping}
-            renderItem={key => (
-              <List.Item actions={[<span onClick={() => this.onDeleteHotkey(key.hotkey)}>Delete</span>]}>
-                {`${key.hotkey} - ${key.remark}`}
+            renderItem={item => (
+              <List.Item actions={[<span onClick={() => this.onDeleteHotkey(item.hotkey)}>Delete</span>]}>
+                {`${item.hotkey} - ${item.remark}`}
               </List.Item>
             )}
           />

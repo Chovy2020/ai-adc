@@ -15,15 +15,10 @@ export const getClassCodes = () => post('manual-code/list')
  */
 export const getHotkeys = (groupId) => get(`adc-group/hotkey/list?filter_EQ_groupId=${groupId}`)
 
-/***
- * 新增 hotkey
- */
-export const addHotkey = (data) => post(`adc-group/hotkey/insert`,data)
-
  /***
   * 修改 hotkey
   */
- export const updateHotkey = (id,data) => put(`adc-group/hotkey/update/${id}`,data)
+ export const updateHotkeyList = (data) => post(`adc-group/hotkey/batch/insert`,data)
  
   /***
  * 新增 group 

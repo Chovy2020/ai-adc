@@ -7,10 +7,11 @@ import hasPermission from '@/components/hasPermission'
 import { DatePicker, Form, Button, Checkbox, Input, Select, Switch, AutoComplete, message } from 'antd'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeToolboxLoading, changeMenu } from '@/utils/action'
-import { delay, reorder } from '@/utils/web'
+import { reorder } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
-import { getItemsData } from './service'
+import { getGroups, getClassCodes } from '@/pages/Config/service'
+import { getItemsData, getImages, updateClassification } from './service'
 import {
   LAYOUT_SIZE,
   FONT_SIZE,
@@ -18,11 +19,7 @@ import {
   ITEMS_MAPPING,
   ITEMS_MAPPING_2,
   CATEGORY_TYPES,
-  VIEW_GROUPS,
-  getLotId,
-  getWaferNo,
-  getDefectId,
-  getStepId
+  VIEW_GROUPS
 } from './constant'
 import {
   StyleManual,
@@ -44,82 +41,52 @@ class Classification extends React.Component {
     this.state = {
       dataQueryVisible: true,
       time: [],
-      items: ['Product Id', 'Step Id', 'Lot Id', 'Wafer Id', 'Group Id'],
+      items: ['Product Id', 'Step Id', 'Lot Id', 'Wafer Id', 'Group Id'], // 默认拖拽框
       itemsData: [],
       itemsKeyword: [],
       itemsSelected: [],
       // images
-      data: {
-        'MB : 0': {
-          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|69|M1_CMP|0': [
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN'
-          ],
-          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|66|M1_CMP|0': [
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN'
-          ],
-          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|207|M1_CMP|0': [
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-95.jpg?op=OPEN',
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-96.jpg?op=OPEN'
-          ]
-        },
-        'MB : 1': {
-          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|7|M1_CMP|1': [
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN'
-          ]
-        },
-        'MB : 2': {
-          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|84|M1_CMP|2': [
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-33.jpg?op=OPEN',
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-34.jpg?op=OPEN'
-          ]
-        },
-        'MB : 3': {
-          'F0004.000|1|Device01|M1_CMP|2020-01-05 23:43:35|180|M1_CMP|3': [
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-81.jpg?op=OPEN',
-            '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-82.jpg?op=OPEN'
-          ]
-        }
-      },
+      data: [],
       columns: 6,
       showLabel: true,
       labelSize: 12,
       categoryType: 'MB',
-      classCodes: ['0-No_Review', '1-FALSE', '2-Unknown', '278-MG_Replaced', '279-MG_Missing'], // ！通过接口获取
-      classCode: '0-No_Review',
-      viewFilters: ['0', '1', '2', '3', '4', '5', '6', '9', '278', '279'], // ！通过接口获取
+      classCodes: [], // ！通过接口获取
+      classCode: null,
+      viewFilters: [], // ！通过图片接口数据，前端封装
       viewFilter: [],
-      viewGroup: 'MB',
+      viewGroup: 'MAN_BIN',
       // selected
       images: [],
       selected: [],
       hotkeyEnable: false,
       hotkeys: [
         {
-          key: 'A',
-          code: '1-FALSE'
-        },
-        {
-          key: 'B',
-          code: '2-Unknown'
-        },
-        {
-          key: 'C',
-          code: '278-MG_Replaced'
+          id: '1242653655352651777',
+          createTm: null,
+          updateTm: null,
+          remark: null,
+          userId: null,
+          groupId: '1242652024632422400',
+          classifyType: null,
+          manualCodeId: '1242379921663172608',
+          hotkey: 'C'
         }
       ],
+      // { A: '1-FALSE', B: '2-Unknown' }
       keyMap: {},
       keyHandlers: {}
     }
   }
 
   // 初始化
-  componentDidMount() {
+  async componentDidMount() {
     this.props.changeMenu('classification')
+    this.setState({
+      classCodes: await getClassCodes(),
+      viewGroups: await getGroups()
+    })
     this.onItemsReset()
-    this.generateKeyMapAndHandlers()
   }
   // 修改时间
   onDatePickerChange = (dates, time) => {
@@ -233,10 +200,12 @@ class Classification extends React.Component {
         }
       }
     }
+    this.setState({ hotkeyEnable })
     if (hotkeyEnable) {
       // call api get hotkeys
+      // /adc-group/hotkey/list/group/{groupId}
+      // this.setState({ hotkeys })
     }
-    this.setState({ hotkeyEnable })
   }
   // Items初始化
   onItemsReset = () => {
@@ -249,19 +218,33 @@ class Classification extends React.Component {
     this.onSearch(0)
   }
   // - - - - - - - - - - - - - - - - - - Classified - - - - - - - - - - - - - - - - - -
-  onClassifiedOk = params => {
+  onClassifiedOk = async params => {
+    let code = null
     if (typeof params === 'string') {
       console.log('Hotkey classification', params)
+      if (params !== '') {
+        code = params
+      }
     } else {
       console.log('Manual classification')
     }
-    const { selected } = this.state
+    const { selected, classCode, categoryType } = this.state
     if (selected.length === 0) {
       message.warning('Please select images first')
       return
     }
-    this.setState({ selected: [] })
+    if (code === null) {
+      const codes = classCode.split('~')
+      code = codes[1]
+    }
+    const updateData = {
+      manualCode: code,
+      classifyCode: categoryType,
+      defectIds: selected
+    }
     message.success('Classification operation succeeded')
+    await updateClassification(updateData)
+    this.setState({ selected: [] })
   }
   onClassifiedReset = () => {
     this.setState({ selected: [] })
@@ -281,24 +264,29 @@ class Classification extends React.Component {
   // - - - - - - - - - - - - - - - - - - Images - - - - - - - - - - - - - - - - - -
   // 获取图片链接的列表 + 过滤
   loadImages = async () => {
-    this.props.changeToolboxLoading(true)
     this.setState({ images: [] })
-    await delay(300)
-    this.props.changeToolboxLoading(false)
-    const { data } = this.state
+    //get images
+    const imageData = {
+      scanTimeBegin: '1970-01-01',
+      scanTimeEnd: '2020-12-31',
+      groupField: 'ROUGH_BIN',
+      productIds: ['Device01']
+    }
+    const res = await getImages(imageData)
     const images = {}
     let count = 0
-    for (const group in data) {
+    for (const group in res) {
       images[group] = []
-      for (const id in data[group]) {
-        for (const index in data[group][id]) {
-          count++
-          images[group].push({
-            id,
-            index,
-            url: data[group][id][index]
-          })
-        }
+      for (const id in res[group]) {
+        count++
+        images[group].push({
+          id: res[group][id].waferDefectId + '-' + count,
+          waferDefectId: res[group][id].waferDefectId,
+          waferNo: res[group][id].waferNo,
+          defectId: res[group][id].defectId,
+          step: res[group][id].step,
+          url: res[group][id].tiffFilePath
+        })
       }
     }
     this.setState({ images })
@@ -483,10 +471,15 @@ class Classification extends React.Component {
                   size='small'
                   filterOption={true}
                   defaultValue={classCode}
-                  dataSource={classCodes}
-                  style={{ width: 150 }}
+                  style={{ width: 200 }}
                   onSelect={classCode => this.setState({ classCode })}
-                />
+                >
+                  {classCodes.map(code => (
+                    <AutoComplete.Option key={code.id} value={code.manualName + '~' + code.manualCode}>
+                      {code.manualName}
+                    </AutoComplete.Option>
+                  ))}
+                </AutoComplete>
                 <Button size='small' onClick={this.onClassifiedOk} type='primary' style={{ marginLeft: 10 }}>
                   Ok
                 </Button>
@@ -513,19 +506,19 @@ class Classification extends React.Component {
                     <StyleImages className={`col${columns}`}>
                       {images[key].map((img, index) => (
                         <li
-                          key={`${img.id}-${index}`}
-                          className={selected.includes(img.id) ? 'selected' : ''}
-                          onClick={() => this.onSelect(img.id, img.index, key)}
+                          key={`${img.id}`}
+                          className={selected.includes(img.waferDefectId) ? 'selected' : ''}
+                          onClick={() => this.onSelect(img.waferDefectId, key)}
                         >
                           <LazyLoad height={200} offset={300} overflow={true}>
                             <img src={`http://161.189.50.41${img.url}`} alt='' />
                           </LazyLoad>
                           {showLabel ? (
                             <div className={`wafer-info font-size-${labelSize}`}>
-                              <p>Lot ID: {getLotId(img.id)}</p>
-                              <p>Wafer No: {getWaferNo(img.id)}</p>
-                              <p>Defect ID: {getDefectId(img.id)}</p>
-                              <p>Step: {getStepId(img.id)}</p>
+                              <p>Lot ID: {img.lotId}</p>
+                              <p>Wafer No: {img.waferNo}</p>
+                              <p>Defect ID: {img.defectId}</p>
+                              <p>Step: {img.step}</p>
                             </div>
                           ) : null}
                         </li>
