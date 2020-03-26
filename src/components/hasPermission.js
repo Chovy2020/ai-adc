@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 const mapStateToProps = state => ({
-  permissions: state.Init.permissions
+  user: state.Init.user
 })
 
 const checkAuth = (permissions, auth) => {
@@ -16,7 +16,8 @@ const hasPermission = Component =>
   )(
     class WrapComponent extends React.Component {
       render() {
-        const { permissions, auth } = this.props
+        const { user, auth } = this.props
+        const permissions = user ? user.buttons : []
         return checkAuth(permissions, auth) ? <Component {...this.props} /> : null
       }
     }
