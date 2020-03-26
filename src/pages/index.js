@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { changeMenu } from '@/utils/action'
-import { MODULES } from '@/utils/constant'
+import { generateModules } from '@/utils/web'
 
 const StyleModuleContainer = styled.div`
   background-color: #f3f9fb;
@@ -51,10 +51,12 @@ class ADC extends React.Component {
   }
 
   render() {
+    const { user } = this.props
+
     return (
       <StyleModuleContainer>
         <ul>
-          {MODULES.map(m => (
+          {generateModules(user).map(m => (
             <li key={m.title}>
               <StyleModule to={m.link} onClick={() => this.onChangeMenu(m.link)}>
                 <img src={m.icon} alt='' />

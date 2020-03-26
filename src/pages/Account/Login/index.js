@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { login, getUser } from './service'
 import { Form, Input, Button, Checkbox, message } from 'antd'
 import { changeMenu } from '@/utils/action'
-// import { delay } from '@/utils/web'
 import { StyleLogin } from './style'
 
 class Login extends React.Component {
@@ -19,9 +18,8 @@ class Login extends React.Component {
 
   componentDidMount() {
     this.props.changeMenu('login')
-    // 清除user
-    localStorage.removeItem('AI_ADC_TOKEN')
-    localStorage.removeItem('AI_ADC_USER')
+    const { user } = this.props
+    if (user) this.props.history.replace('/')
   }
 
   handleSubmit = async e => {
@@ -39,9 +37,8 @@ class Login extends React.Component {
     localStorage.setItem('AI_ADC_TOKEN', res.token)
     const user = await getUser()
     localStorage.setItem('AI_ADC_USER', JSON.stringify(user))
-    // localStorage.setItem('AI_ADC_USER', JSON.stringify({buttons: ['adc:config:view']}))
-    // await delay(1000)
-    this.props.history.replace('/')
+    // 登录完成，需要router重新初始化
+    window.location.href = '/'
   }
 
   onFormInput = (key, value) => {
@@ -84,5 +81,9 @@ class Login extends React.Component {
     )
   }
 }
+
+const mapStateToProps = state => ({
+  user: state.Init.user
+})
 const mapDispatchToProps = { changeMenu }
-export default connect(() => ({}), mapDispatchToProps)(Login)
+export default connect(mapStateToProps, mapDispatchToProps)(Login)

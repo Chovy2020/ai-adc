@@ -5,6 +5,9 @@ import Builder from '@/pages/Builder/Loadable'
 import Reporting from '@/pages/Reporting/Loadable'
 import Manage from '@/pages/Manage/Loadable'
 import Config from '@/pages/Config/Loadable'
+// Common Route
+import Login from '@/pages/Account/Login/Loadable'
+import Page404 from '@/pages/Account/404'
 
 // Module Icon
 import IconClassification from '@/assets/images/Classification.png'
@@ -51,5 +54,16 @@ export const MODULES = [
     link: '/config',
     icon: IconConfig,
     page: Config
+  }
+]
+
+export const COMMON_ROUTES = [
+  {
+    link: '/login',
+    page: Login
+  },
+  {
+    link: '/404',
+    page: Page404
   }
 ]

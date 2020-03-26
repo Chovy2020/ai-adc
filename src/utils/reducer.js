@@ -3,9 +3,7 @@ const reducer = (
     shiftMultipleMode: false,
     activeMenu: '',
     toolBoxLoading: false,
-    classifyCodes: [],
-    user: null,
-    permissions: []
+    user: null
   },
   action
 ) => {
@@ -13,13 +11,7 @@ const reducer = (
     case 'CHANGE_USER':
       return {
         ...state,
-        user: action.payload,
-        permissions: action.payload.buttons
-      }
-    case 'CLASSIFY_CODES_INIT':
-      return {
-        ...state,
-        classifyCodes: action.payload
+        user: action.payload
       }
     case 'CHANGE_SHIFT_MULTIPLE_MODE':
       return {

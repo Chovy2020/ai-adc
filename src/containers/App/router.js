@@ -1,76 +1,51 @@
 import React from 'react'
-import _ from 'lodash'
 import { connect } from 'react-redux'
+import { Spin, Popover, Avatar } from 'antd'
 import { BrowserRouter, Route, Switch, Redirect, Link } from 'react-router-dom'
-import { Spin, Popover } from 'antd'
 import { changeMenu, changeUser } from '@/utils/action'
+import { generateModules } from '@/utils/web'
+import { COMMON_ROUTES } from '@/utils/constant'
 import { StyleHeader, StyleLogo, StyleContainer, StyleMenu, StyleUser } from './style'
-import { MODULES } from '@/utils/constant'
-
-// ADC Common Pages
 import Home from '@/pages'
-import Login from '@/pages/Account/Login/Loadable'
-import Page404 from '@/pages/Account/404'
-
-const COMMON_ROUTES = [
-  {
-    link: '/',
-    page: Home
-  },
-  {
-    link: '/login',
-    page: Login
-  }
-]
-
-const modules = _.cloneDeep(MODULES)
-modules.unshift({
-  title: 'Home',
-  link: '/'
-})
 
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      user: null,
-      customModules: []
+      routes: []
     }
   }
-
+  // 初始化
   componentDidMount() {
-    this.onInit()
+    let user = localStorage.getItem('AI_ADC_USER')
+    if (!user) return
+    user = JSON.parse(user)
+    this.props.changeUser(user)
+    // 根据user.buttons生成routes
+    let routes = generateModules(user)
+    // routes = routes.filter((item, index) => index < 3)
+    // Header增加Home
+    routes.unshift({
+      title: 'Home',
+      link: '/',
+      page: Home
+    })
+    this.setState({ routes })
   }
 
   onChangeMenu = link => {
     this.props.changeMenu(link.substr(1))
   }
 
-  onInit = () => {
-    console.log('onInit')
+  onLogout = () => {
+    localStorage.removeItem('AI_ADC_TOKEN')
+    localStorage.removeItem('AI_ADC_USER')
+    window.location.href = '/login'
   }
 
   render() {
-    const { toolBoxLoading, activeMenu } = this.props
-
-    let CUSTOM_MODULES = []
-    let user = localStorage.getItem('AI_ADC_USER')
-    let isLogged = true
-    if (user) {
-      user = JSON.parse(user)
-      let customRoutes = []
-      for (const str of user.buttons) {
-        const perm = str.split(':')
-        if (perm[2] === 'view' && !customRoutes.includes(perm[1])) {
-          customRoutes.push(perm[1])
-        }
-      }
-      customRoutes = customRoutes.map(route => `/${route}`)
-      CUSTOM_MODULES = MODULES.filter(route => customRoutes.includes(route.link))
-      // CUSTOM_MODULES = CUSTOM_MODULES.filter((item, index) => index < 3)
-    } else isLogged = false
-
-    // console.log('isLogged', isLogged, CUSTOM_MODULES.length)
+    const { toolBoxLoading, activeMenu, user } = this.props
+    const { routes } = this.state
 
     return (
       <BrowserRouter>
@@ -78,10 +53,10 @@ class App extends React.Component {
           <Link to='/'>
             <StyleLogo>AI ADC</StyleLogo>
           </Link>
-          {isLogged ? (
+          {user ? (
             <>
               <StyleMenu>
-                {modules.map(m => (
+                {routes.map(m => (
                   <li key={m.link}>
                     <Link
                       className={`/${activeMenu}` === m.link ? 'active' : ''}
@@ -94,8 +69,17 @@ class App extends React.Component {
                 ))}
               </StyleMenu>
               <StyleUser>
-                <Popover placement='bottomRight' content={<Link to='/login'>Logout</Link>} trigger='click'>
-                  <b>{user.nickName}</b>
+                <Popover
+                  placement='bottomRight'
+                  content={
+                    <>
+                      <p>{user.nickName}</p>
+                      <p onClick={this.onLogout}>Logout</p>
+                    </>
+                  }
+                  trigger='click'
+                >
+                  <Avatar style={{ backgroundColor: '#fff', color: '#333' }} icon='user' />
                 </Popover>
               </StyleUser>
             </>
@@ -105,19 +89,18 @@ class App extends React.Component {
           <Spin size='large' spinning={toolBoxLoading}>
             <Switch>
               {COMMON_ROUTES.map(r => (
-                <Route key={r.link} exact={r.link === '/'} path={r.link} component={r.page} />
+                <Route key={r.link} exact path={r.link} component={r.page} />
               ))}
-              <Route path='/404' component={Page404} />
-              {isLogged ? (
+              {user ? (
                 <>
-                  {CUSTOM_MODULES.map(r => (
-                    <Route key={r.link} exact={r.link === '/'} path={r.link} component={r.page} />
+                  {routes.map(r => (
+                    <Route key={r.link} exact path={r.link} component={r.page} />
                   ))}
                 </>
               ) : (
                 <Redirect to='/login' />
               )}
-              <Redirect form='/*' to='/404' />
+              <Redirect from='*' to='/404' />
             </Switch>
           </Spin>
         </StyleContainer>
@@ -127,9 +110,9 @@ class App extends React.Component {
 }
 
 const mapStateToProps = state => ({
+  user: state.Init.user,
   toolBoxLoading: state.Init.toolBoxLoading,
-  activeMenu: state.Init.activeMenu,
-  permissions: state.Init.permissions
+  activeMenu: state.Init.activeMenu
 })
 const mapDispatchToProps = { changeMenu, changeUser }
 export default connect(mapStateToProps, mapDispatchToProps)(App)

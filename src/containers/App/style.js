@@ -25,6 +25,7 @@ export const StyleContainer = styled.div`
   & > .ant-spin-nested-loading > .ant-spin-container {
     height: calc(100vh - 50px);
   }
+  overflow: hidden;
 `
 
 export const StyleMenu = styled.ul`
@@ -48,11 +49,17 @@ export const StyleMenu = styled.ul`
 
 export const StyleUser = styled.div`
   flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   text-align: right;
-  b {
-    color: #00f;
-    :hover {
-      cursor: pointer;
+  .ant-avatar {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .anticon-user {
+      margin-top: -2px;
     }
   }
 `

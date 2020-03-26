@@ -1,8 +1,3 @@
-// 全局公共的manual codes初始化
-export const classifyCodesInit = payload => ({
-  type: 'CLASSIFY_CODES_INIT',
-  payload
-})
 // 全局Loading控制
 export const changeToolboxLoading = payload => ({
   type: 'CHANGE_TOOLBOX_LOADING',
