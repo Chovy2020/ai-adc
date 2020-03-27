@@ -1,9 +1,9 @@
 const reducer = (
   state = {
     shiftMultipleMode: false,
-    activeMenu: '',
+    activeMenu: null,
     toolBoxLoading: false,
-    user: null
+    user: {}
   },
   action
 ) => {

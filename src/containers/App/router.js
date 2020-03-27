@@ -17,8 +17,12 @@ class App extends React.Component {
   }
   // 初始化
   componentDidMount() {
+    console.log('componentDidMount', this.state.routes)
     let user = localStorage.getItem('AI_ADC_USER')
-    if (!user) return
+    if (!user) {
+      this.props.changeUser(null)
+      return
+    }
     user = JSON.parse(user)
     this.props.changeUser(user)
     // 根据user.buttons生成routes
@@ -44,6 +48,7 @@ class App extends React.Component {
 
   render() {
     const { toolBoxLoading, activeMenu, user } = this.props
+    console.log('render', user)
     const { routes } = this.state
 
     return (
