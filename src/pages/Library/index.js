@@ -10,6 +10,7 @@ import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
 import { MODAL_MODES, LIBRARY, GALLERY_IMAGES, IMAGES_LIBRARY } from './constant'
+import { getGroups, getProducts, getSteps } from './service'
 import {
   StyleLibrary,
   StyleChoose,
@@ -25,8 +26,12 @@ class Library extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      groups: ['1', '2', '3'],
-      group: '1',
+      products: [],
+      steps: [],
+      groups: [],
+      group: '',
+      step: '',
+      product: '',
       // create
       visible: false,
       createLib: {
@@ -51,9 +56,13 @@ class Library extends React.Component {
     }
   }
   // 初始化
-  componentDidMount() {
+  async componentDidMount() {
     this.props.changeMenu('library')
-    this.setState({ galleryImages: GALLERY_IMAGES })
+    this.setState({
+      galleryImages: GALLERY_IMAGES,
+      groups: await getGroups()
+    })
+    // 获取 Product Id
     // this.onShowLibrary()
   }
   // - - - - - - - - - - - - - - - - - - Show Library - - - - - - - - - - - - - - - - - -
@@ -198,8 +207,31 @@ class Library extends React.Component {
     }
   }
 
+  // Group，Product，Step ID 级联选择
+  async selectControl(id, type) {
+    if (type === 'group') {
+      this.setState({
+        'group': id,
+        'products': await getProducts(id),
+        'product': ''
+      })
+    }
+    if (type === 'product') {
+      this.setState({
+        'product': id,
+        'steps': await getSteps(this.state.group, id),
+        'step': ''
+      })
+    }
+    if (type === 'step') {
+      this.setState({
+        'step': id
+      })
+    }
+  }
+
   render() {
-    const { groups, visible, createLib, library, editCode, selected, modalMode } = this.state
+    const { groups, group, steps, step, products, product, visible, createLib, library, editCode, selected, modalMode } = this.state
     const { galleryVisible, gallerySelected, galleryRouter } = this.state
     const folderList = this.getFolderList()
 
@@ -210,11 +242,23 @@ class Library extends React.Component {
             <Form.Item>
               <Select
                 size='small'
-                placeholder='Product Id'
+                placeholder='Group Id'
                 style={{ width: 120 }}
-                onChange={group => this.setState({ group })}
+                onChange={id => this.selectControl(id, 'group')}
               >
                 {groups.map(s => (
+                  <Select.Option value={s.id} key={s.id}>
+                    {s.groupName}
+                  </Select.Option>
+                ))}
+              </Select>
+              <Select
+                size='small'
+                placeholder='Product Id'
+                style={{ width: 120, marginLeft: 10 }}
+                onChange={id => this.selectControl(id, 'product')}
+              >
+                {products.map(s => (
                   <Select.Option value={s} key={s}>
                     {s}
                   </Select.Option>
@@ -224,21 +268,9 @@ class Library extends React.Component {
                 size='small'
                 placeholder='Step Id'
                 style={{ width: 120, marginLeft: 10 }}
-                onChange={group => this.setState({ group })}
+                onChange={id => this.selectControl(id, 'step')}
               >
-                {groups.map(s => (
-                  <Select.Option value={s} key={s}>
-                    {s}
-                  </Select.Option>
-                ))}
-              </Select>
-              <Select
-                size='small'
-                placeholder='Group Id'
-                style={{ width: 120, marginLeft: 10 }}
-                onChange={group => this.setState({ group })}
-              >
-                {groups.map(s => (
+                {steps.map(s => (
                   <Select.Option value={s} key={s}>
                     {s}
                   </Select.Option>
