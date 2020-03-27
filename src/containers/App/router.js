@@ -23,7 +23,6 @@ class App extends React.Component {
     this.props.changeUser(user)
     // 根据user.buttons生成routes
     let routes = generateModules(user)
-    // routes = routes.filter((item, index) => index < 3)
     // Header增加Home
     routes.unshift({
       title: 'Home',

@@ -20,7 +20,7 @@ const HTTP_ERROR_CODE = {
 }
 
 // 全局axios配置
-axios.defaults.baseURL = '/'
+axios.defaults.baseURL = '/adc/'
 axios.defaults.withCredentials = true
 axios.defaults.timeout = 30 * 60 * 1000
 

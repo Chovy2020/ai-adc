@@ -35,7 +35,7 @@ class Login extends React.Component {
     }
     const res = await login(account)
     localStorage.setItem('AI_ADC_TOKEN', res.token)
-    const user = await getUser()
+    const user = await getUser(res.token)
     localStorage.setItem('AI_ADC_USER', JSON.stringify(user))
     // 登录完成，需要router重新初始化
     window.location.href = '/'
