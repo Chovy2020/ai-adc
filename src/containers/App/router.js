@@ -17,7 +17,6 @@ class App extends React.Component {
   }
   // 初始化
   componentDidMount() {
-    console.log('componentDidMount', this.state.routes)
     let user = localStorage.getItem('AI_ADC_USER')
     if (!user) {
       this.props.changeUser(null)
@@ -48,7 +47,6 @@ class App extends React.Component {
 
   render() {
     const { toolBoxLoading, activeMenu, user } = this.props
-    console.log('render', user)
     const { routes } = this.state
 
     return (
