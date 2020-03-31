@@ -43,6 +43,7 @@ class Builder extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      tools: [],
       models: [
         {
           id: 1,
@@ -70,7 +71,7 @@ class Builder extends React.Component {
         mb: ''
       },
       // models
-      activeModel: {
+      activeTool: {
         pre: [],
         tuning: [],
         reject: []
@@ -84,7 +85,32 @@ class Builder extends React.Component {
     this.props.changeMenu('builder')
     this.loadFiles(true)
     this.setState({ library: LIBRARY })
+    this.loadTools()
     // this.setState({ classifyCodes: await getClassifyCodes() })
+  }
+  // 加载左侧的模型工具
+  loadTools = () => {
+    const tools = [
+      {
+        id: 1,
+        key: 'pre',
+        name: 'Pre-Treatment',
+        tools: PRE_TREATMENT
+      },
+      {
+        id: 2,
+        key: 'tuning',
+        name: 'Model Tuning',
+        tools: MODEL_TUNING
+      },
+      {
+        id: 3,
+        key: 'reject',
+        name: 'Reject Model',
+        tools: REJECT_MODEL
+      }
+    ]
+    this.setState({ tools })
   }
   loadFiles = async () => {
     this.setState({ files: [] })
@@ -104,112 +130,112 @@ class Builder extends React.Component {
         {
           id: 1,
           name: 'F0004-tif-25',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 2,
           name: 'F0004-tif-26',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 3,
           name: 'F0004-tif-23',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 4,
           name: 'F0004-tif-24',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 5,
           name: 'F0004-tif-1',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 6,
           name: 'F0004-tif-2',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 11,
           name: 'F0004-tif-25',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 12,
           name: 'F0004-tif-26',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 13,
           name: 'F0004-tif-23',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 14,
           name: 'F0004-tif-24',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 15,
           name: 'F0004-tif-1',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 16,
           name: 'F0004-tif-2',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 21,
           name: 'F0004-tif-25',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 22,
           name: 'F0004-tif-26',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 23,
           name: 'F0004-tif-23',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 24,
           name: 'F0004-tif-24',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 25,
           name: 'F0004-tif-1',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 26,
           name: 'F0004-tif-2',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 123,
           name: 'F0004-tif-23',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 124,
           name: 'F0004-tif-24',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 125,
           name: 'F0004-tif-1',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         },
         {
           id: 126,
           name: 'F0004-tif-2',
-          url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN'
+          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
         }
       ]
     }
@@ -295,18 +321,18 @@ class Builder extends React.Component {
   }
   // - - - - - - - - - - - - - - - - - - Model - - - - - - - - - - - - - - - - - -
   onToolAdd = (type, tool) => {
-    const { activeModel } = this.state
-    activeModel[type].push({
+    const { activeTool } = this.state
+    activeTool[type].push({
       id: Math.floor(Math.random() * 1000000),
       name: tool.name,
       icon: tool.icon
     })
-    this.setState({ activeModel })
+    this.setState({ activeTool })
   }
   onToolRemove = (type, toolId) => {
-    const { activeModel } = this.state
-    activeModel[type] = activeModel[type].filter(m => m.id !== toolId)
-    this.setState({ activeModel })
+    const { activeTool } = this.state
+    activeTool[type] = activeTool[type].filter(m => m.id !== toolId)
+    this.setState({ activeTool })
   }
   onToolEdit = (type, tool) => {
     this.setState({ configVisible: true, configTool: tool.name })
@@ -314,16 +340,16 @@ class Builder extends React.Component {
   onConfigModalOk = () => {
     this.setState({ configVisible: false })
     // configTool应记录id
-    const { activeModel, configTool } = this.state
-    for (const key in activeModel) {
-      for (const model of activeModel[key]) {
+    const { activeTool, configTool } = this.state
+    for (const key in activeTool) {
+      for (const model of activeTool[key]) {
         // 通过唯一id确定，同类型的tool会重复
         if (model.name === configTool) {
           model.config = {}
         }
       }
     }
-    this.setState({ activeModel })
+    this.setState({ activeTool })
   }
   onModelSave = () => {
     message.success('Save successfully')
@@ -393,11 +419,11 @@ class Builder extends React.Component {
   }
 
   render() {
-    const { models, model, modelMb, files, selected } = this.state
+    const { models, model, modelMb, files, selected, tools } = this.state
     const { visible, gallerySelected, galleryRouter } = this.state
     const folderList = this.getFolderList()
 
-    const { activeModel, configVisible, configTool, createVisible } = this.state
+    const { activeTool, configVisible, configTool, createVisible } = this.state
     const isFolder = modelMb === ''
 
     return (
@@ -406,36 +432,20 @@ class Builder extends React.Component {
           <Col span={3} style={{ padding: 10, borderRight: '1px solid #ccc' }}>
             <h2>Utilization</h2>
             <StyleToolsGroup>
-              <h4>Pre-Treatment</h4>
-              <ul>
-                {PRE_TREATMENT.map(m => (
-                  <li key={m.name}>
-                    <Tooltip placement='topLeft' title={m.name}>
-                      <Icon onClick={() => this.onToolAdd('pre', m)} theme='filled' type={m.icon} />
-                    </Tooltip>
-                  </li>
-                ))}
-              </ul>
-              <h4>Model Tuning</h4>
-              <ul>
-                {MODEL_TUNING.map(m => (
-                  <li key={m.name}>
-                    <Tooltip placement='topLeft' title={m.name}>
-                      <Icon onClick={() => this.onToolAdd('tuning', m)} theme='filled' type={m.icon} />
-                    </Tooltip>
-                  </li>
-                ))}
-              </ul>
-              <h4>Reject Model</h4>
-              <ul>
-                {REJECT_MODEL.map(m => (
-                  <li key={m.name}>
-                    <Tooltip placement='topLeft' title={m.name}>
-                      <Icon onClick={() => this.onToolAdd('reject', m)} theme='filled' type={m.icon} />
-                    </Tooltip>
-                  </li>
-                ))}
-              </ul>
+              {tools.map(group => (
+                <React.Fragment key={group.id}>
+                  <h4>{group.name}</h4>
+                  <ul>
+                    {group.tools.map(t => (
+                      <li key={t.name}>
+                        <Tooltip placement='topLeft' title={t.name}>
+                          <Icon onClick={() => this.onToolAdd(group.key, t)} theme='filled' type={t.icon} />
+                        </Tooltip>
+                      </li>
+                    ))}
+                  </ul>
+                </React.Fragment>
+              ))}
             </StyleToolsGroup>
           </Col>
           <Col span={21} style={{ padding: 10 }}>
@@ -463,7 +473,7 @@ class Builder extends React.Component {
                 </Select>
               }
             >
-              <Button type='primary'>Load Template \& Create</Button>
+              <Button type='primary'>Load Template & Create</Button>
             </Popover>
             <span style={{ marginLeft: 20 }}>{model}</span>
             <StyleImagesContainer>
@@ -495,7 +505,7 @@ class Builder extends React.Component {
                         className={selected.includes(img.id) ? 'selected' : ''}
                         onClick={() => this.onImageSelect(img.id)}
                       >
-                        <img src={isFolder ? Folder : `http://161.189.50.41${img.url}`} alt='' />
+                        <img src={isFolder ? Folder : `${window.BASE_URL}${img.url}`} alt='' />
                       </li>
                     ))}
                   </>
@@ -508,7 +518,7 @@ class Builder extends React.Component {
                 <Col span={6} className='model-block'>
                   <h4>Pre-Treatment</h4>
                   <StyleModelList>
-                    {activeModel.pre.map(m => (
+                    {activeTool.pre.map(m => (
                       <li key={m.id}>
                         <Popover
                           placement='right'
@@ -549,7 +559,7 @@ class Builder extends React.Component {
                 <Col span={6} className='model-block'>
                   <h4>Model Tuning</h4>
                   <StyleModelList>
-                    {activeModel.tuning.map(m => (
+                    {activeTool.tuning.map(m => (
                       <li key={m.id}>
                         <Popover
                           placement='right'
@@ -590,7 +600,7 @@ class Builder extends React.Component {
                 <Col span={6} className='model-block'>
                   <h4>Reject Model</h4>
                   <StyleModelList>
-                    {activeModel.reject.map(m => (
+                    {activeTool.reject.map(m => (
                       <li key={m.id}>
                         <Popover
                           placement='right'
@@ -684,7 +694,7 @@ class Builder extends React.Component {
                   className={gallerySelected.includes(img.id) ? 'selected' : ''}
                   onClick={() => this.onGalleryImageSelect(img.id)}
                 >
-                  <img src={`http://161.189.50.41${img.url}`} alt='' />
+                  <img src={`${window.BASE_URL}${img.url}`} alt='' />
                 </li>
               ))}
             </StyleImages>

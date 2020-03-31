@@ -1,5 +1,5 @@
 const path = require('path')
-const { override, fixBabelImports, addWebpackAlias } = require('customize-cra')
+const { override, fixBabelImports, addWebpackAlias, addDecoratorsLegacy } = require('customize-cra')
 
 const joinRootPath = p => path.join(process.cwd(), p)
 
@@ -11,5 +11,6 @@ module.exports = override(
     libraryDirectory: 'es',
     style: 'css'
   }),
-  addWebpackAlias({ '@': joinRootPath('src') })
+  addWebpackAlias({ '@': joinRootPath('src') }),
+  addDecoratorsLegacy()
 )

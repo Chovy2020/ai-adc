@@ -10,7 +10,7 @@ import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import { reorder } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
-import { getGroups, getClassCodes } from '@/pages/Config/service'
+import { getClassCodes, getHotkeys } from '@/pages/Config/service'
 import { getItemsData, getImages, updateClassification } from './service'
 import {
   LAYOUT_SIZE,
@@ -45,7 +45,7 @@ class Classification extends React.Component {
       itemsData: [],
       itemsKeyword: [],
       itemsSelected: [],
-      // images
+      // images 123
       data: [],
       columns: 6,
       showLabel: true,
@@ -60,19 +60,7 @@ class Classification extends React.Component {
       images: [],
       selected: [],
       hotkeyEnable: false,
-      hotkeys: [
-        {
-          id: '1242653655352651777',
-          createTm: null,
-          updateTm: null,
-          remark: null,
-          userId: null,
-          groupId: '1242652024632422400',
-          classifyType: null,
-          manualCodeId: '1242379921663172608',
-          hotkey: 'C'
-        }
-      ],
+      hotkeys: [],
       // { A: '1-FALSE', B: '2-Unknown' }
       keyMap: {},
       keyHandlers: {}
@@ -81,10 +69,10 @@ class Classification extends React.Component {
 
   // 初始化
   async componentDidMount() {
+    //classification 提交
     this.props.changeMenu('classification')
     this.setState({
-      classCodes: await getClassCodes(),
-      viewGroups: await getGroups()
+      classCodes: await getClassCodes()
     })
     this.onItemsReset()
   }
@@ -202,9 +190,11 @@ class Classification extends React.Component {
     }
     this.setState({ hotkeyEnable })
     if (hotkeyEnable) {
-      // call api get hotkeys
-      // /adc-group/hotkey/list/group/{groupId}
-      // this.setState({ hotkeys })
+      const groupId = '1242652024632422400'
+      // call api get hotkeys getHotkeys
+      const hotkeys = await getHotkeys(groupId)
+      this.setState({ hotkeys })
+      this.generateKeyMapAndHandlers()
     }
   }
   // Items初始化
@@ -221,12 +211,12 @@ class Classification extends React.Component {
   onClassifiedOk = async params => {
     let code = null
     if (typeof params === 'string') {
-      console.log('Hotkey classification', params)
       if (params !== '') {
-        code = params
+        const codes = params.split('-')
+        code = codes[0]
+        const { hotkeyEnable } = this.state
+        if (!hotkeyEnable) return
       }
-    } else {
-      console.log('Manual classification')
     }
     const { selected, classCode, categoryType } = this.state
     if (selected.length === 0) {
@@ -234,8 +224,8 @@ class Classification extends React.Component {
       return
     }
     if (code === null) {
-      const codes = classCode.split('~')
-      code = codes[1]
+      const codes = classCode.split('-')
+      code = codes[0]
     }
     const updateData = {
       manualCode: code,
@@ -244,6 +234,7 @@ class Classification extends React.Component {
     }
     message.success('Classification operation succeeded')
     await updateClassification(updateData)
+    await this.loadImages()
     this.setState({ selected: [] })
   }
   onClassifiedReset = () => {
@@ -255,41 +246,60 @@ class Classification extends React.Component {
       message.warning('Please select images first')
       return
     }
+    //api 传 选择图片Ids
     this.setState({ selected: [] })
     message.success('Add to library succeeded')
   }
   onHotkeyEnableChange = hotkeyEnable => {
-    this.setState({ hotkeyEnable })
+    this.setState({ hotkeyEnable, selected: [] })
   }
   // - - - - - - - - - - - - - - - - - - Images - - - - - - - - - - - - - - - - - -
   // 获取图片链接的列表 + 过滤
   loadImages = async () => {
-    this.setState({ images: [] })
+    this.setState({ images: [], viewFilters: [] })
+    const { items, itemsSelected, time, viewGroup } = this.state
     //get images
     const imageData = {
-      scanTimeBegin: '1970-01-01',
-      scanTimeEnd: '2020-12-31',
-      groupField: 'ROUGH_BIN',
-      productIds: ['Device01']
+      scanTimeBegin: time[0] || '1970-01-01',
+      scanTimeEnd: time[1] || '2020-12-31',
+      groupField: viewGroup
+    }
+    if (time.length > 0) {
+      imageData.scanTimeBegin = time[0]
+      imageData.scanTimeEnd = time[1]
+    }
+    for (const index in items) {
+      for (const item in ITEMS_MAPPING_2) {
+        if (ITEMS_MAPPING_2[item][0] === items[index]) {
+          imageData[ITEMS_MAPPING_2[item][1]] = itemsSelected[index]
+        }
+      }
     }
     const res = await getImages(imageData)
     const images = {}
+    const viewFilters = []
     let count = 0
     for (const group in res) {
       images[group] = []
       for (const id in res[group]) {
         count++
+        if (viewFilters === []) viewFilters.push(res[group][id].manBin)
+        if (!viewFilters.includes(res[group][id].manBin)) {
+          viewFilters.push(res[group][id].manBin)
+        }
         images[group].push({
           id: res[group][id].waferDefectId + '-' + count,
           waferDefectId: res[group][id].waferDefectId,
           waferNo: res[group][id].waferNo,
           defectId: res[group][id].defectId,
           step: res[group][id].step,
+          manBin: res[group][id].manBin,
           url: res[group][id].tiffFilePath
         })
       }
     }
-    this.setState({ images })
+
+    this.setState({ images, viewFilters })
     if (count === 0) message.warning('No photos yet')
   }
   /**
@@ -315,13 +325,20 @@ class Classification extends React.Component {
   }
   // 生成热键、热键绑定事件
   generateKeyMapAndHandlers = () => {
-    const { hotkeys } = this.state
+    const { hotkeys, classCodes } = this.state
     const keyMap = {}
     const keyHandlers = {}
     for (const h of hotkeys) {
-      const key = h.key.toLocaleLowerCase()
+      const key = h.hotkey.toLocaleLowerCase()
+      let code = null
+      for (const index in classCodes) {
+        if (classCodes[index].id === h.manualCodeId) {
+          code = classCodes[index].manualCode + '-' + classCodes[index].manualName
+        }
+      }
+      h.remark = code
       keyMap[key] = key
-      keyHandlers[key] = () => this.onClassifiedOk(h.code)
+      keyHandlers[key] = () => this.onClassifiedOk(code)
     }
     this.setState({ keyMap, keyHandlers })
   }
@@ -329,7 +346,7 @@ class Classification extends React.Component {
   render() {
     const { dataQueryVisible, items, itemsData, itemsSelected, itemsKeyword } = this.state
     const { columns, showLabel, labelSize, categoryType, classCodes, classCode, images, selected } = this.state
-    const { viewGroup, viewFilters, hotkeys, keyMap, keyHandlers, hotkeyEnable } = this.state
+    const { viewGroup, viewFilters, viewFilter, hotkeys, keyMap, keyHandlers, hotkeyEnable } = this.state
 
     return (
       <StyleManual>
@@ -475,8 +492,8 @@ class Classification extends React.Component {
                   onSelect={classCode => this.setState({ classCode })}
                 >
                   {classCodes.map(code => (
-                    <AutoComplete.Option key={code.id} value={code.manualName + '~' + code.manualCode}>
-                      {code.manualName}
+                    <AutoComplete.Option key={code.id} value={code.manualCode + '-' + code.manualName}>
+                      {`${code.manualCode} - ${code.manualName}`}
                     </AutoComplete.Option>
                   ))}
                 </AutoComplete>
@@ -509,9 +526,17 @@ class Classification extends React.Component {
                           key={`${img.id}`}
                           className={selected.includes(img.waferDefectId) ? 'selected' : ''}
                           onClick={() => this.onSelect(img.waferDefectId, key)}
+                          style={{
+                            display:
+                              viewFilter.length <= 0
+                                ? 'block'
+                                : viewFilter.indexOf(img.manBin) !== -1
+                                ? 'block'
+                                : 'none'
+                          }}
                         >
                           <LazyLoad height={200} offset={300} overflow={true}>
-                            <img src={`http://161.189.50.41${img.url}`} alt='' />
+                            <img src={`${window.BASE_URL}${img.url}`} alt='' />
                           </LazyLoad>
                           {showLabel ? (
                             <div className={`wafer-info font-size-${labelSize}`}>
@@ -538,7 +563,7 @@ class Classification extends React.Component {
                     size='small'
                     style={{ width: 120 }}
                     defaultValue={viewGroup}
-                    onChange={viewGroup => this.setState({ viewGroup })}
+                    onChange={viewGroup => this.setState({ viewGroup: _.cloneDeep(viewGroup) })}
                   >
                     {VIEW_GROUPS.map(g => (
                       <Select.Option value={g[1]} key={g[1]}>
@@ -568,8 +593,8 @@ class Classification extends React.Component {
                   <h5>Hotkey Setting</h5>
                   <ul>
                     {hotkeys.map(h => (
-                      <li key={h.key}>
-                        【{h.key}】： {h.code}
+                      <li key={h.hotkey}>
+                        【{h.hotkey}】： {h.remark}
                       </li>
                     ))}
                   </ul>
