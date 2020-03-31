@@ -11,7 +11,7 @@ import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
 import { MODAL_MODES, LIBRARY, GALLERY_IMAGES, IMAGES_LIBRARY } from './constant'
-import { getGroups, getProducts, getSteps } from './service'
+import { getGroups, getProducts, getSteps, showLibrary, getDefectGroups, insertLibrary, getDefectSteps, getDefectProducts } from './service'
 import {
   StyleLibrary,
   StyleChoose,
@@ -33,9 +33,13 @@ class Library extends React.Component {
       group: '',
       step: '',
       product: '',
+      librarys: [],
       // create
       visible: false,
       createLib: {
+        groups: [],
+        products: [],
+        steps: [],
         group: '',
         product: '',
         step: ''
@@ -59,24 +63,32 @@ class Library extends React.Component {
   // 初始化
   async componentDidMount() {
     this.props.changeMenu('library')
+    let { createLib } = this.state
+    createLib.groups = await getDefectGroups()
     this.setState({
       galleryImages: GALLERY_IMAGES,
-      groups: await getGroups()
+      groups: await getGroups(),
+      createLib
     })
     // 获取 Product Id
     // this.onShowLibrary()
   }
   // - - - - - - - - - - - - - - - - - - Show Library - - - - - - - - - - - - - - - - - -
   onShowLibrary = async () => {
-    this.setState({ library: [] })
+    this.setState({ librarys: [] })
     this.props.changeToolboxLoading(true)
-    await delay(500)
-    this.props.changeToolboxLoading(false)
-    const library = LIBRARY.map(code => {
-      code.expand = false
-      return code
+    let {product, step, group} = this.state
+    let librarys = await showLibrary({
+      ProductId: product,
+      StepId: step,
+      GroupId: group,
     })
-    this.setState({ library })
+    this.props.changeToolboxLoading(false)
+    // library = LIBRARY.map(code => {
+    //   code.expand = false
+    //   return code
+    // })
+    this.setState({ librarys })
   }
   onDefectInfoChange = (index, key, value) => {
     const { library } = this.state
@@ -121,17 +133,23 @@ class Library extends React.Component {
   onShareExist = () => {
     this.setState({ modalMode: MODAL_MODES[1], visible: true })
   }
-  onModalOk = async () => {
+  onModalAddLibrary = async () => {
     this.setState({ visible: false })
     this.props.changeToolboxLoading(true)
-    await delay(500)
+    let { createLib } = this.state
+    await insertLibrary({
+      ProductId: createLib.product,
+      StepId: createLib.step,
+      GroupId: createLib.group
+    })
     this.props.changeToolboxLoading(false)
-    const { modalMode } = this.state
-    if (modalMode === MODAL_MODES[0]) {
-      this.setState({ library: [] })
-    } else if (modalMode === MODAL_MODES[1]) {
-      this.setState({ library: LIBRARY })
-    }
+    message.success('Create successfully')
+    // const { modalMode } = this.state
+    // if (modalMode === MODAL_MODES[0]) {
+    //   this.setState({ library: [] })
+    // } else if (modalMode === MODAL_MODES[1]) {
+    //   this.setState({ library: LIBRARY })
+    // }
   }
   onRemoveImages = async () => {
     const { selected } = this.state
@@ -210,25 +228,44 @@ class Library extends React.Component {
 
   // Group，Product，Step ID 级联选择
   async selectControl(id, type) {
-    if (type === 'group') {
-      this.setState({
-        'group': id,
-        'products': await getProducts(id),
-        'product': ''
-      })
+    let { createLib } = this.state
+    switch (type) {
+      case 'group':
+        this.setState({
+          'group': id,
+          'products': await getProducts(id),
+          'product': ''
+        })
+        break
+      case 'product':
+        this.setState({
+          'product': id,
+          'steps': await getSteps(this.state.group, id),
+          'step': ''
+        })
+        break
+      case 'step':
+        this.setState({
+          'step': id
+        })
+        break
+      case 'createLibGroup':
+        createLib.group = id
+        createLib.products = await getDefectProducts(id)
+        createLib.product = ''
+        break
+      case 'createLibProduct':
+        createLib.product = id
+        createLib.steps = await getDefectSteps(createLib.group, id)
+        createLib.step = ''
+        break
+      case 'createLibStep':
+        createLib.step = id
+        break
+      default:
+        return
     }
-    if (type === 'product') {
-      this.setState({
-        'product': id,
-        'steps': await getSteps(this.state.group, id),
-        'step': ''
-      })
-    }
-    if (type === 'step') {
-      this.setState({
-        'step': id
-      })
-    }
+    this.setState({ createLib })
   }
 
   render() {
@@ -405,11 +442,11 @@ class Library extends React.Component {
             </StyleImagesGroup>
           ) : null}
         </StyleContainer>
-
+        {/* 创建Labrary */}
         <Modal
           title={modalMode}
           visible={visible}
-          onOk={this.onModalOk}
+          onOk={this.onModalAddLibrary}
           onCancel={() => this.setState({ visible: false })}
         >
           <Form
@@ -419,7 +456,19 @@ class Library extends React.Component {
             wrapperCol={{ span: 18 }}
           >
             <Form.Item label='Group:'>
-              <AutoComplete
+              <Select
+                size='small'
+                placeholder='Group Id'
+                style={{ width: 120 }}
+                onChange={id => this.selectControl(id, 'createLibGroup')}
+              >
+                {createLib.groups.map(s => (
+                  <Select.Option value={s.group_id} key={s.group_id}>
+                    {s.group_name}
+                  </Select.Option>
+                ))}
+              </Select>
+              {/* <AutoComplete
                 allowClear
                 size='small'
                 filterOption={true}
@@ -427,29 +476,35 @@ class Library extends React.Component {
                 dataSource={['2', '222', '221', '2333']}
                 style={{ width: 150 }}
                 onChange={v => this.onCreateLibraryInput('group', v)}
-              />
+              /> */}
             </Form.Item>
             <Form.Item label='Product:'>
-              <AutoComplete
-                allowClear
+              <Select
                 size='small'
-                filterOption={true}
-                defaultValue={createLib.group}
-                dataSource={['2', '222', '221', '2333']}
-                style={{ width: 150 }}
-                onChange={v => this.onCreateLibraryInput('group', v)}
-              />
+                placeholder='Product Id'
+                style={{ width: 120 }}
+                onChange={id => this.selectControl(id, 'createLibProduct')}
+              >
+                {createLib.products.map(s => (
+                  <Select.Option value={s} key={s}>
+                    {s}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
-            <Form.Item label='Step Id:'>
-              <AutoComplete
-                allowClear
+            <Form.Item label='Step:'>
+              <Select
                 size='small'
-                filterOption={true}
-                defaultValue={createLib.group}
-                dataSource={['2', '222', '221', '2333']}
-                style={{ width: 150 }}
-                onChange={v => this.onCreateLibraryInput('group', v)}
-              />
+                placeholder='Step Id'
+                style={{ width: 120 }}
+                onChange={id => this.selectControl(id, 'createLibStep')}
+              >
+                {createLib.steps.map(s => (
+                  <Select.Option value={s} key={s}>
+                    {s}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
           </Form>
         </Modal>

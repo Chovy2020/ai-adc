@@ -1,9 +1,16 @@
-import { get } from '@/utils/api'
+import { get, post } from '@/utils/api'
 
-// get products, steps, grounps
+// get library products, steps, grounps
 export const getGroups = () => get('defect/library/params/group/list')
 export const getProducts = (groupId) => get(`defect/library/params/product/list/${groupId}`)
 export const getSteps = (groupId, productId) => get(`defect/library/params/step/list/${groupId}/${productId}`)
+export const showLibrary = (data) => post('defect/library/show', data)
+// get defect products, steps, grounps
+export const getDefectGroups = () => get('defect/params/group/list')
+export const getDefectProducts = (groupId) => get(`defect/params/product/list/${groupId}`)
+export const getDefectSteps = (groupId, productId) => get(`defect/params/step/list/${groupId}/${productId}`)
+// add library
+export const insertLibrary = (data) => post('defect/library/insert', data)
 
 
 // /**
