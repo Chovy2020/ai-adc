@@ -3,6 +3,7 @@ const reducer = (
     shiftMultipleMode: false,
     activeMenu: null,
     toolBoxLoading: false,
+    // 初始化不为null，防止router初次render直接重定向到login页面
     user: {}
   },
   action

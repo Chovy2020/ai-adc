@@ -10,8 +10,8 @@ class Login extends React.Component {
     super(props)
     this.state = {
       account: {
-        username: 'admin',
-        password: '123456'
+        username: '',
+        password: ''
       }
     }
   }
@@ -66,8 +66,8 @@ class Login extends React.Component {
           <Form.Item>
             <Input.Password
               value={account.password}
-              onChange={e => this.onFormInput('username', e.target.value)}
-              placeholder='Username'
+              onChange={e => this.onFormInput('password', e.target.value)}
+              placeholder='Password'
             />
           </Form.Item>
           <Form.Item>

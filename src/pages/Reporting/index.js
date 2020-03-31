@@ -357,7 +357,6 @@ class Reporting extends React.Component {
 
     return (
       <StyleReporting>
-        <h2>Reporting</h2>
         <StyleOverview>
           <h3>Overview</h3>
           <Row>

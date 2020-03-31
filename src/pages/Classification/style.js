@@ -140,6 +140,7 @@ export const DragContainer = styled.div`
   height: 250px;
   background-color: #f3f3f3;
   overflow-x: auto;
+  overflow-y: hidden;
   display: flex;
   margin: 0;
   padding: 5px;

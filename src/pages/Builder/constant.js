@@ -99,274 +99,274 @@ export const REJECT_MODEL = [
 export const LIBRARY = [
   {
     id: 1,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 2,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 3,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 4,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 14,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 15,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
   {
     id: 21,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 22,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 23,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 24,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 26,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 25,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
   {
     id: 31,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 32,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 33,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 34,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 35,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 36,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
 
   {
     id: 41,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 42,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 43,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 44,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 414,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 415,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
   {
     id: 421,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 422,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 423,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 424,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 426,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 425,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
   {
     id: 431,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 432,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 433,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 434,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 435,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 436,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
 
   {
     id: 81,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 82,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 83,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 84,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 814,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 815,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
   {
     id: 821,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 822,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 823,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 824,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 826,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 825,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   },
   {
     id: 831,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-25.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 832,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-26.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 69
   },
   {
     id: 833,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-23.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 834,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-24.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 3
   },
   {
     id: 835,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-1.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 4
   },
   {
     id: 836,
-    url: '/webhdfs/v1/ai_yei/archive/image/F0004-000-000-0001-tif-2.jpg?op=OPEN',
+    url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg',
     defect: 5
   }
 ]
