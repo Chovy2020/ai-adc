@@ -2,15 +2,15 @@ import React from 'react'
 // import _ from 'lodash'
 // import LazyLoad from 'react-lazyload'
 import { connect } from 'react-redux'
-import { Form, Button, Input, Select, AutoComplete, Modal, Breadcrumb, message } from 'antd'
+import { Form, Button, Input, Select, Modal, Breadcrumb, message } from 'antd'
 // import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import Folder from '@/assets/images/folder.png'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
-import { MODAL_MODES, LIBRARY, GALLERY_IMAGES, IMAGES_LIBRARY } from './constant'
-import { getGroups, getProducts, getSteps, showLibrary, getDefectGroups, insertLibrary, getDefectSteps, getDefectProducts } from './service'
+import { MODAL_MODES, GALLERY_IMAGES } from './constant'
+import { libraryUpdate, addImage, getGroups, getProducts, getSteps, showLibrary, getDefectGroups, insertLibrary, getDefectSteps, getDefectProducts, getDefectManualBin, getDefectImagesList } from './service'
 import {
   StyleLibrary,
   StyleChoose,
@@ -26,6 +26,7 @@ class Library extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      baseImageUrl: 'https://images-bucket.s3.cn-northwest-1.amazonaws.com.cn',
       products: [],
       steps: [],
       groups: [],
@@ -44,7 +45,7 @@ class Library extends React.Component {
         step: ''
       },
       // images
-      library: null,
+      library: [],
       selected: [], // imageIds
       editCode: '',
       modalMode: '',
@@ -53,21 +54,37 @@ class Library extends React.Component {
       galleryImages: [],
       gallerySelected: [],
       galleryRouter: {
-        group: '',
-        product: '',
-        mb: ''
+        curr: 'group',
+        group: {
+          list: [],
+          index: null
+        },
+        product: {
+          list: [],
+          index: null
+        },
+        step: {
+          list: [],
+          index: null
+        },
+        manualBin: {
+          list: [],
+          index: null
+        }
       }
     }
   }
   // 初始化
   async componentDidMount() {
     this.props.changeMenu('library')
-    let { createLib } = this.state
-    createLib.groups = await getDefectGroups()
+    let { createLib, galleryRouter } = this.state
+    let dg = await getDefectGroups()
+    createLib.groups = galleryRouter.group.list = JSON.parse(JSON.stringify(dg))
+    galleryRouter.group.list = JSON.parse(JSON.stringify(dg)).map(item => {return {id: item.group_id, name: item.group_name}})
     this.setState({
       galleryImages: GALLERY_IMAGES,
       groups: await getGroups(),
-      createLib
+      createLib, galleryRouter
     })
     // 获取 Product Id
     // this.onShowLibrary()
@@ -78,9 +95,9 @@ class Library extends React.Component {
     this.props.changeToolboxLoading(true)
     let {product, step, group} = this.state
     let librarys = await showLibrary({
-      ProductId: product,
-      StepId: step,
-      GroupId: group,
+      productId: product,
+      stepId: step,
+      groupId: group,
     })
     this.props.changeToolboxLoading(false)
     // library = LIBRARY.map(code => {
@@ -90,14 +107,20 @@ class Library extends React.Component {
     this.setState({ librarys })
   }
   onDefectInfoChange = (index, key, value) => {
-    const { library } = this.state
-    library[index][key] = value
-    this.setState({ library })
+    const { librarys } = this.state
+    librarys[index][key] = value
+    this.setState({ librarys })
   }
-  onDefectInfoSave = index => {
-    // const { library } = this.state
-    // const { characterization, causeHypothesis } = library[index]
-    // console.log('code:', library[index].code, characterization, causeHypothesis)
+  onDefectInfoSave = async index => {
+    const { librarys, editCode } = this.state
+    this.props.changeToolboxLoading(true)
+    await libraryUpdate({
+      libraryId: librarys[index].libraryId,
+      manualCodeId: editCode,
+      characterization: librarys[index].characterization,
+      causeHypothesis: librarys[index].causeHypothesis
+    })
+    this.props.changeToolboxLoading(false)
     message.success('Save successfully')
     this.setState({ editCode: '' })
   }
@@ -111,17 +134,42 @@ class Library extends React.Component {
     this.setState({ selected })
   }
   getCodeImagesExample = (codeImages, expand) => {
-    if (!expand && codeImages.length > 4) {
+    if (codeImages && !expand && codeImages.length > 4) {
       codeImages = codeImages.filter((c, i) => i < 4)
     }
     return codeImages
   }
   onViewMoreImages = (index, expand) => {
-    const { library } = this.state
-    library[index].expand = expand
-    this.setState({ library })
+    const { librarys } = this.state
+    librarys[index].expand = expand
+    this.setState({ librarys })
   }
   // - - - - - - - - - - - - - - - - - - Create Library - - - - - - - - - - - - - - - - - -
+  // 创建library
+  onModalAddLibrary = async () => {
+    let { createLib } = this.state
+    let msg = []
+    if(!createLib.product) msg.push('Please select product ID')
+    if(!createLib.step) msg.push('Please select step ID')
+    if (!createLib.group) msg.push('Please select group ID')
+    if (msg.length > 0) {
+      message.error(msg.toString());
+      return
+    }
+    this.setState({ visible: false })
+    this.props.changeToolboxLoading(true)
+    let data = await insertLibrary({
+      productId: createLib.product,
+      stepId: createLib.step,
+      groupId: createLib.group
+    })
+    this.props.changeToolboxLoading(false)
+    message.success('Create successfully')
+    this.setState({
+      library: [{ "code": data.id }]
+    })
+  }
+
   onCreateLibrary = () => {
     this.setState({ modalMode: MODAL_MODES[0], visible: true })
   }
@@ -132,24 +180,7 @@ class Library extends React.Component {
   onShareExist = () => {
     this.setState({ modalMode: MODAL_MODES[1], visible: true })
   }
-  onModalAddLibrary = async () => {
-    this.setState({ visible: false })
-    this.props.changeToolboxLoading(true)
-    let { createLib } = this.state
-    await insertLibrary({
-      ProductId: createLib.product,
-      StepId: createLib.step,
-      GroupId: createLib.group
-    })
-    this.props.changeToolboxLoading(false)
-    message.success('Create successfully')
-    // const { modalMode } = this.state
-    // if (modalMode === MODAL_MODES[0]) {
-    //   this.setState({ library: [] })
-    // } else if (modalMode === MODAL_MODES[1]) {
-    //   this.setState({ library: LIBRARY })
-    // }
-  }
+
   onRemoveImages = async () => {
     const { selected } = this.state
     if (selected.length === 0) {
@@ -164,6 +195,27 @@ class Library extends React.Component {
     this.setState({ library })
   }
   // - - - - - - - - - - - - - - - - - - Gallery Images - - - - - - - - - - - - - - - - - -
+  // 添加图片到library
+  onGalleryModalOk = async () => {
+    this.setState({ galleryVisible: false })
+    this.props.changeToolboxLoading(true)
+    await addImage({
+      libraryId: this.state.librarys[0].libraryId,
+      refDefectIds: this.state.gallerySelected
+    })
+    this.props.changeToolboxLoading(false)
+
+    // await delay(500)
+    // this.props.changeToolboxLoading(false)
+    // const { galleryRouter, gallerySelected, library } = this.state
+    // if (library.length === 0) return
+    // const images = IMAGES_LIBRARY[galleryRouter.group][galleryRouter.product][galleryRouter.mb]
+    // const selected = images.filter(img => gallerySelected.includes(img.id))
+    // library[0].images = [...library[0].images, ...selected]
+    // this.setState({ library })
+  }
+
+  // 图片选择
   onGalleryImageSelect = id => {
     let { gallerySelected } = this.state
     if (gallerySelected.includes(id)) {
@@ -173,56 +225,51 @@ class Library extends React.Component {
     }
     this.setState({ gallerySelected })
   }
-  onGalleryModalOk = async () => {
-    this.setState({ galleryVisible: false })
-    this.props.changeToolboxLoading(true)
-    await delay(500)
-    this.props.changeToolboxLoading(false)
-    const { galleryRouter, gallerySelected, library } = this.state
-    if (library.length === 0) return
-    const images = IMAGES_LIBRARY[galleryRouter.group][galleryRouter.product][galleryRouter.mb]
-    const selected = images.filter(img => gallerySelected.includes(img.id))
-    library[0].images = [...library[0].images, ...selected]
-    this.setState({ library })
-  }
+  // 路径选择
   onGalleryRouterClick = i => {
     const { galleryRouter } = this.state
-    if (i === 0) {
-      galleryRouter.group = ''
-      galleryRouter.product = ''
-      galleryRouter.mb = ''
-    } else if (i === 1) {
-      galleryRouter.product = ''
-      galleryRouter.mb = ''
-    } else if (i === 2) {
-      galleryRouter.mb = ''
+    galleryRouter.curr = i
+    if (i === 'step') {
+      galleryRouter.manualBin.index = null
+      galleryRouter.step.index = null
+    } else if (i === 'product') {
+      galleryRouter.product.index = null
+      galleryRouter.step.index = null
+      galleryRouter.manualBin.index = null
+    } else if (i === 'group') {
+      galleryRouter.group.index = null
+      galleryRouter.product.index = null
+      galleryRouter.step.index = null
+      galleryRouter.manualBin.index = null
     }
     this.setState({ galleryRouter })
   }
-  onGalleryFolderDbClick = folder => {
-    const { galleryRouter } = this.state
-    if (galleryRouter.mb !== '') {
-      message.error('error')
-    } else if (galleryRouter.product !== '') {
-      galleryRouter.mb = folder
-    } else if (galleryRouter.group !== '') {
-      galleryRouter.product = folder
-    } else {
-      galleryRouter.group = folder
+
+  // 打开文件夹
+  onGalleryFolderDbClick = async index => {
+    let { galleryRouter, galleryImages } = this.state
+    galleryRouter[galleryRouter.curr].index = index
+    if (galleryRouter.curr === 'group') {
+      let d = await getDefectProducts(galleryRouter.group.list[galleryRouter.group.index].id)
+      galleryRouter.product.list = d.map(item => { return { id: item, name: item } })
+      galleryRouter.product.index = null
+      galleryRouter.curr = 'product'
+    } else if (galleryRouter.curr === 'product') {
+      let d = await getDefectSteps(galleryRouter.group.list[galleryRouter.group.index].id, galleryRouter.product.list[galleryRouter.product.index].id)
+      galleryRouter.step.list = d.map(item => { return { id: item, name: item } })
+      galleryRouter.step.index = null
+      galleryRouter.curr = 'step'
+    } else if (galleryRouter.curr === 'step') {
+      let d = await getDefectManualBin(galleryRouter.group.list[galleryRouter.group.index].id, galleryRouter.product.list[galleryRouter.product.index].id, galleryRouter.step.list[galleryRouter.step.index].id)
+      galleryRouter.manualBin.list = d.map(item => { return { id: item, name: item } })
+      galleryRouter.manualBin.index = null
+      galleryRouter.curr = 'manualBin'
+    } else if (galleryRouter.curr === 'manualBin') {
+      let d = await getDefectImagesList(galleryRouter.group.list[galleryRouter.group.index].id, galleryRouter.product.list[galleryRouter.product.index].id, galleryRouter.step.list[galleryRouter.step.index].id, galleryRouter.manualBin.list[galleryRouter.manualBin.index].id)
+      galleryImages = d
+      galleryRouter.curr = 'images'
     }
-    this.setState({ galleryRouter })
-  }
-  getFolderList = () => {
-    const { galleryRouter } = this.state
-    if (galleryRouter.mb !== '') {
-      return null
-    } else if (galleryRouter.product !== '') {
-      return Object.keys(IMAGES_LIBRARY[galleryRouter.group][galleryRouter.product])
-    } else if (galleryRouter.group !== '') {
-      return Object.keys(IMAGES_LIBRARY[galleryRouter.group])
-    } else {
-      return Object.keys(IMAGES_LIBRARY)
-    }
+    this.setState({ galleryRouter, galleryImages })
   }
 
   // Group，Product，Step ID 级联选择
@@ -233,7 +280,9 @@ class Library extends React.Component {
         this.setState({
           'group': id,
           'products': await getProducts(id),
-          'product': ''
+          'product': '',
+          'steps': [],
+          'step': ''
         })
         break
       case 'product':
@@ -252,6 +301,8 @@ class Library extends React.Component {
         createLib.group = id
         createLib.products = await getDefectProducts(id)
         createLib.product = ''
+        createLib.steps = []
+        createLib.step = ''
         break
       case 'createLibProduct':
         createLib.product = id
@@ -268,9 +319,8 @@ class Library extends React.Component {
   }
 
   render() {
-    const { groups, group, steps, step, products, product, visible, createLib, library, editCode, selected, modalMode } = this.state
+    const { groups, steps, products, visible, createLib, editCode, selected, modalMode, baseImageUrl, galleryImages, librarys } = this.state
     const { galleryVisible, gallerySelected, galleryRouter } = this.state
-    const folderList = this.getFolderList()
 
     return (
       <StyleLibrary>
@@ -293,6 +343,7 @@ class Library extends React.Component {
                 size='small'
                 placeholder='Product Id'
                 style={{ width: 120, marginLeft: 10 }}
+                value={this.state.product || undefined}
                 onChange={id => this.selectControl(id, 'product')}
               >
                 {products.map(s => (
@@ -305,6 +356,7 @@ class Library extends React.Component {
                 size='small'
                 placeholder='Step Id'
                 style={{ width: 120, marginLeft: 10 }}
+                value={this.state.step || undefined}
                 onChange={id => this.selectControl(id, 'step')}
               >
                 {steps.map(s => (
@@ -324,7 +376,7 @@ class Library extends React.Component {
               <Button
                 size='small'
                 style={{ width: 120 }}
-                disabled={!library || library.length > 0}
+                disabled={librarys.length <= 0}
                 type='primary'
                 onClick={this.onShareExist}
               >
@@ -334,13 +386,13 @@ class Library extends React.Component {
                 style={{ width: 120 }}
                 size='small'
                 type='primary'
-                disabled={!library}
+                disabled={librarys.length <= 0}
                 onClick={() => this.setState({ galleryVisible: true })}
               >
                 Add Images
               </Button>
               <Button
-                disabled={!library}
+                disabled={librarys.length <= 0}
                 style={{ width: 120 }}
                 size='small'
                 type='danger'
@@ -352,15 +404,15 @@ class Library extends React.Component {
           </Form>
         </StyleChoose>
         <StyleContainer>
-          {library ? (
+          {librarys ? (
             <StyleImagesGroup>
-              {library.map((group, index) => (
-                <div key={group.code}>
+              {librarys.map((group, index) => (
+                <div key={group.manualCode}>
                   <StyleDefectInfo>
                     <span style={{ display: 'inline-block', fontWeight: 'bold', width: 240 }}>
-                      【Defect Code {group.code}: {group.name}】: {group.images.length}
+                      【Defect Code {group.manualCode}: {(group.manualCodeName)}】: {group.images.length}
                     </span>
-                    {editCode === group.code ? (
+                    {editCode === group.manualCodeId ? (
                       <Button
                         size='small'
                         type='primary'
@@ -373,7 +425,7 @@ class Library extends React.Component {
                       <Button
                         size='small'
                         type='primary'
-                        onClick={() => this.setState({ editCode: group.code })}
+                        onClick={() => this.setState({ editCode: group.manualCodeId })}
                         style={{ width: 40, marginLeft: 10 }}
                       >
                         Edit
@@ -406,11 +458,11 @@ class Library extends React.Component {
                   <StyleImages className={`col6`} style={{ position: 'relative' }}>
                     {this.getCodeImagesExample(group.images, group.expand).map((img, index) => (
                       <li
-                        key={img.id}
-                        className={selected.includes(img.id) ? 'selected' : ''}
-                        onClick={() => this.onImageSelect(img.id)}
+                        key={index}
+                        className={selected.includes(img.defectRelId) ? 'selected' : ''}
+                        onClick={() => this.onImageSelect(img.defectRelId)}
                       >
-                        <img src={`http://161.189.50.41${img.url}`} alt='' />
+                        <img src={`${baseImageUrl}${img.url}`} alt='' />
                       </li>
                     ))}
                     {!group.expand ? (
@@ -418,7 +470,7 @@ class Library extends React.Component {
                         <div>
                           <h4>Characterization:</h4>
                           <Input.TextArea
-                            disabled={editCode !== group.code}
+                            disabled={editCode !== group.manualCodeId}
                             defaultValue={group.characterization}
                             size='small'
                             onChange={e => this.onDefectInfoChange(index, 'characterization', e.target.value)}
@@ -427,7 +479,7 @@ class Library extends React.Component {
                         <div>
                           <h4>Cause/Hypothesis:</h4>
                           <Input.TextArea
-                            disabled={editCode !== group.code}
+                            disabled={editCode !== group.manualCodeId}
                             defaultValue={group.causeHypothesis}
                             size='small'
                             onChange={e => this.onDefectInfoChange(index, 'causeHypothesis', e.target.value)}
@@ -467,21 +519,13 @@ class Library extends React.Component {
                   </Select.Option>
                 ))}
               </Select>
-              {/* <AutoComplete
-                allowClear
-                size='small'
-                filterOption={true}
-                defaultValue={createLib.group}
-                dataSource={['2', '222', '221', '2333']}
-                style={{ width: 150 }}
-                onChange={v => this.onCreateLibraryInput('group', v)}
-              /> */}
             </Form.Item>
             <Form.Item label='Product:'>
               <Select
                 size='small'
                 placeholder='Product Id'
                 style={{ width: 120 }}
+                value={this.state.createLib.product || undefined}
                 onChange={id => this.selectControl(id, 'createLibProduct')}
               >
                 {createLib.products.map(s => (
@@ -496,6 +540,7 @@ class Library extends React.Component {
                 size='small'
                 placeholder='Step Id'
                 style={{ width: 120 }}
+                value={this.state.createLib.step || undefined}
                 onChange={id => this.selectControl(id, 'createLibStep')}
               >
                 {createLib.steps.map(s => (
@@ -516,41 +561,41 @@ class Library extends React.Component {
           onCancel={() => this.setState({ galleryVisible: false })}
         >
           <Breadcrumb separator='>'>
-            <Breadcrumb.Item onClick={() => this.onGalleryRouterClick(0)}>Home</Breadcrumb.Item>
-            {galleryRouter.group !== '' ? (
-              <>
-                <Breadcrumb.Item onClick={() => this.onGalleryRouterClick(1)}>{galleryRouter.group}</Breadcrumb.Item>
-                {galleryRouter.product ? (
-                  <>
-                    <Breadcrumb.Item onClick={() => this.onGalleryRouterClick(2)}>
-                      {galleryRouter.product}
-                    </Breadcrumb.Item>
-                    {galleryRouter.mb ? (
-                      <Breadcrumb.Item>{galleryRouter.mb}</Breadcrumb.Item>
-                    ) : null}
-                  </>
-                ) : null}
-              </>
-            ) : null}
+            <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('group')}>Home</Breadcrumb.Item>
+            {
+              galleryRouter.group.index !== null && (
+                <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('product')}>{galleryRouter.group.list[galleryRouter.group.index].name}</Breadcrumb.Item>
+              )
+            }
+            {
+              galleryRouter.product.index !== null && (
+                <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('step')}>{galleryRouter.product.list[galleryRouter.product.index].name}</Breadcrumb.Item>
+              )
+            }
+            {
+              galleryRouter.step.index !== null && (
+                <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('manualBin')} className={galleryRouter.curr === 'images' ? 'ant-breadcrumb-link-p' : ''}>{galleryRouter.step.list[galleryRouter.step.index].name}</Breadcrumb.Item>
+              )
+            }
           </Breadcrumb>
-          {folderList ? (
+          {galleryRouter.curr !== 'images' ? (
             <StyleImages className='gallery'>
-              {folderList.map(folder => (
-                <li key={folder} onDoubleClick={() => this.onGalleryFolderDbClick(folder)}>
+              {galleryRouter[galleryRouter.curr].list.map((item, index) => (
+                <li key={item.id} onDoubleClick={() => this.onGalleryFolderDbClick(index)}>
                   <img src={Folder} alt='' />
-                  <p>{folder}</p>
+                  <p>{item.name}</p>
                 </li>
               ))}
             </StyleImages>
           ) : (
             <StyleImages className='gallery images'>
-              {IMAGES_LIBRARY[galleryRouter.group][galleryRouter.product][galleryRouter.mb].map((img, index) => (
+              {galleryImages.map((img, ind) => (
                 <li
-                  key={img.id}
-                  className={gallerySelected.includes(img.id) ? 'selected' : ''}
-                  onClick={() => this.onGalleryImageSelect(img.id)}
+                  key={ind}
+                  className={gallerySelected.includes(img.refDefectId) ? 'selected' : ''}
+                  onClick={() => this.onGalleryImageSelect(img.refDefectId)}
                 >
-                  <img src={`http://161.189.50.41${img.url}`} alt='' />
+                  <img src={`${baseImageUrl}${img.defectPicPath}`} alt='' />
                 </li>
               ))}
             </StyleImages>

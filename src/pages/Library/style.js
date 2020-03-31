@@ -104,6 +104,7 @@ export const StyleImages = styled.ul`
       margin: 0;
       text-align: center;
     }
+    &:active{ opacity: .7; }
   }
   &.gallery.images li img {
     height: 100%;
@@ -152,5 +153,9 @@ export const StyleImagesModal = styled(Modal)`
   .ant-breadcrumb span:last-child .ant-breadcrumb-link {
     color: rgba(0, 0, 0, 0.65);
     cursor: default;
+  }
+  .ant-breadcrumb-link-p {
+    color: #1890ff;
+    cursor: pointer;
   }
 `
