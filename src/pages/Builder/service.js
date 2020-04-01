@@ -1,8 +1,12 @@
-import { post } from '@/utils/api'
+import { get, post } from '@/utils/api'
 /**
- * 获取模型 列表
+ * 工具列表
  */
-export const getModels = () => post('library/get_library')
+export const getStages = () => get('adc-builder/stage/list')
+/**
+ * 模型列表
+ */
+export const getModels = () => get('adc-builder/stage/list')
 /**
  * 获取模板 列表
  */

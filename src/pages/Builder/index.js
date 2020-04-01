@@ -1,5 +1,5 @@
 import React from 'react'
-// import _ from 'lodash'
+import _ from 'lodash'
 // import LazyLoad from 'react-lazyload'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -12,8 +12,7 @@ import {
   Input,
   Modal,
   Form,
-  AutoComplete,
-  Checkbox,
+  InputNumber,
   Select,
   Popover,
   Breadcrumb,
@@ -26,8 +25,8 @@ import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 // import { getClassifyCodes } from '@/pages/Classification/service'
 import reducer from './reducer'
-import { PRE_TREATMENT, MODEL_TUNING, REJECT_MODEL, LIBRARY } from './constant'
-import { ITEMS_LIST } from '@/pages/Classification/constant'
+import { getStages, getModels } from './service'
+import { LIBRARY, TOOL_STAGES, TOOL_CONFIG_STEP } from './constant'
 import { IMAGES_LIBRARY } from '@/pages/Library/constant'
 import {
   StyleBuilder,
@@ -43,7 +42,7 @@ class Builder extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      tools: [],
+      stages: [],
       models: [
         {
           id: 1,
@@ -71,12 +70,14 @@ class Builder extends React.Component {
         mb: ''
       },
       // models
-      activeTool: {
-        pre: [],
-        tuning: [],
-        reject: []
+      activeTools: {
+        PRE: [],
+        TUNING: [],
+        REJECT: []
       },
-      configTool: '',
+      configTool: {
+        params: []
+      },
       configVisible: false
     }
   }
@@ -85,32 +86,18 @@ class Builder extends React.Component {
     this.props.changeMenu('builder')
     this.loadFiles(true)
     this.setState({ library: LIBRARY })
-    this.loadTools()
+    this.loadStages()
     // this.setState({ classifyCodes: await getClassifyCodes() })
   }
+  // 加载模型列表
+  loadModels = async () => {
+    const models = await getModels()
+    console.log(models)
+  }
   // 加载左侧的模型工具
-  loadTools = () => {
-    const tools = [
-      {
-        id: 1,
-        key: 'pre',
-        name: 'Pre-Treatment',
-        tools: PRE_TREATMENT
-      },
-      {
-        id: 2,
-        key: 'tuning',
-        name: 'Model Tuning',
-        tools: MODEL_TUNING
-      },
-      {
-        id: 3,
-        key: 'reject',
-        name: 'Reject Model',
-        tools: REJECT_MODEL
-      }
-    ]
-    this.setState({ tools })
+  loadStages = async () => {
+    const stages = await getStages()
+    this.setState({ stages })
   }
   loadFiles = async () => {
     this.setState({ files: [] })
@@ -320,36 +307,53 @@ class Builder extends React.Component {
     this.setState({ librarySelected })
   }
   // - - - - - - - - - - - - - - - - - - Model - - - - - - - - - - - - - - - - - -
-  onToolAdd = (type, tool) => {
-    const { activeTool } = this.state
-    activeTool[type].push({
-      id: Math.floor(Math.random() * 1000000),
-      name: tool.name,
-      icon: tool.icon
+  onToolAdd = (stage, tool) => {
+    const { activeTools } = this.state
+    activeTools[stage].push({
+      key: Math.floor(Math.random() * 1000000),
+      ...tool
     })
-    this.setState({ activeTool })
+    this.setState({ activeTools })
   }
-  onToolRemove = (type, toolId) => {
-    const { activeTool } = this.state
-    activeTool[type] = activeTool[type].filter(m => m.id !== toolId)
-    this.setState({ activeTool })
+  onToolRemove = (stage, toolKey) => {
+    const { activeTools } = this.state
+    activeTools[stage] = activeTools[stage].filter(tool => tool.key !== toolKey)
+    this.setState({ activeTools })
   }
-  onToolEdit = (type, tool) => {
-    this.setState({ configVisible: true, configTool: tool.name })
+  onToolEdit = tool => {
+    this.setState({ configVisible: true, configTool: _.cloneDeep(tool) })
+  }
+  // Config Params 输入
+  onToolConfigParamsChange = (paramId, paramType, value) => {
+    const { configTool } = this.state
+    for (const i in configTool.params) {
+      if (configTool.params[i].id === paramId) {
+        if (paramType === 'VAL') {
+          configTool.params[i].value = value
+        } else if (paramType === 'NUM0') {
+          configTool.params[i].number0 = value
+        } else if (paramType === 'NUM1') {
+          configTool.params[i].number1 = value
+        }
+        break
+      }
+    }
+    this.setState({ configTool })
   }
   onConfigModalOk = () => {
     this.setState({ configVisible: false })
     // configTool应记录id
-    const { activeTool, configTool } = this.state
-    for (const key in activeTool) {
-      for (const model of activeTool[key]) {
+    const { activeTools, configTool } = this.state
+    for (const s in activeTools) {
+      for (const i in activeTools[s]) {
         // 通过唯一id确定，同类型的tool会重复
-        if (model.name === configTool) {
-          model.config = {}
+        if (activeTools[s][i].key === configTool.key) {
+          activeTools[s][i] = _.cloneDeep(configTool)
+          break
         }
       }
     }
-    this.setState({ activeTool })
+    this.setState({ activeTools })
   }
   onModelSave = () => {
     message.success('Save successfully')
@@ -419,11 +423,11 @@ class Builder extends React.Component {
   }
 
   render() {
-    const { models, model, modelMb, files, selected, tools } = this.state
+    const { models, model, modelMb, files, selected, stages } = this.state
     const { visible, gallerySelected, galleryRouter } = this.state
     const folderList = this.getFolderList()
 
-    const { activeTool, configVisible, configTool, createVisible } = this.state
+    const { activeTools, configVisible, configTool, createVisible } = this.state
     const isFolder = modelMb === ''
 
     return (
@@ -432,14 +436,14 @@ class Builder extends React.Component {
           <Col span={3} style={{ padding: 10, borderRight: '1px solid #ccc' }}>
             <h2>Utilization</h2>
             <StyleToolsGroup>
-              {tools.map(group => (
-                <React.Fragment key={group.id}>
-                  <h4>{group.name}</h4>
+              {stages.map(stage => (
+                <React.Fragment key={stage.id}>
+                  <h4>{stage.stageName}</h4>
                   <ul>
-                    {group.tools.map(t => (
-                      <li key={t.name}>
-                        <Tooltip placement='topLeft' title={t.name}>
-                          <Icon onClick={() => this.onToolAdd(group.key, t)} theme='filled' type={t.icon} />
+                    {stage.tools.map(tool => (
+                      <li key={tool.id}>
+                        <Tooltip placement='topLeft' title={tool.toolName}>
+                          <Icon onClick={() => this.onToolAdd(stage.stageCode, tool)} theme='filled' type='edit' />
                         </Tooltip>
                       </li>
                     ))}
@@ -473,7 +477,7 @@ class Builder extends React.Component {
                 </Select>
               }
             >
-              <Button type='primary'>Load Template & Create</Button>
+              <Button type='primary'>Load Template</Button>
             </Popover>
             <span style={{ marginLeft: 20 }}>{model}</span>
             <StyleImagesContainer>
@@ -515,126 +519,53 @@ class Builder extends React.Component {
 
             <StyleModelContainer>
               <Row>
-                <Col span={6} className='model-block'>
-                  <h4>Pre-Treatment</h4>
-                  <StyleModelList>
-                    {activeTool.pre.map(m => (
-                      <li key={m.id}>
-                        <Popover
-                          placement='right'
-                          content={
-                            <>
+                {TOOL_STAGES.map((stage, index) => (
+                  <React.Fragment key={stage}>
+                    {index > 0 ? (
+                      <Col span={2} className='model-icon'>
+                        <Icon type='arrow-right' />
+                      </Col>
+                    ) : null}
+                    <Col span={6} className='model-block'>
+                      <h4>Pre-Treatment</h4>
+                      <StyleModelList>
+                        {activeTools[stage].map(tool => (
+                          <li key={tool.key}>
+                            <Popover
+                              placement='right'
+                              content={
+                                <>
+                                  <Button
+                                    type='primary'
+                                    shape='circle'
+                                    icon='edit'
+                                    onClick={() => this.onToolEdit(tool)}
+                                  />
+                                  <Button
+                                    type='danger'
+                                    shape='circle'
+                                    icon='delete'
+                                    onClick={() => this.onToolRemove(stage, tool.key)}
+                                  />
+                                </>
+                              }
+                            >
                               <Button
                                 type='primary'
-                                shape='circle'
-                                icon='edit'
-                                onClick={() => this.onToolEdit('pre', m)}
-                              />
-                              <Button
-                                type='danger'
-                                shape='circle'
-                                icon='delete'
-                                onClick={() => this.onToolRemove('pre', m.id)}
-                              />
-                            </>
-                          }
-                        >
-                          <Button
-                            type='primary'
-                            className={m.config ? 'config' : ''}
-                            onDoubleClick={() => this.onToolEdit('pre', m)}
-                          >
-                            <Icon type={m.icon} />
-                            {m.name}
-                            {m.config ? <Icon type='check' /> : null}
-                          </Button>
-                        </Popover>
-                      </li>
-                    ))}
-                  </StyleModelList>
-                </Col>
-                <Col span={2} className='model-icon'>
-                  <Icon type='arrow-right' />
-                </Col>
-                <Col span={6} className='model-block'>
-                  <h4>Model Tuning</h4>
-                  <StyleModelList>
-                    {activeTool.tuning.map(m => (
-                      <li key={m.id}>
-                        <Popover
-                          placement='right'
-                          content={
-                            <>
-                              <Button
-                                type='primary'
-                                shape='circle'
-                                icon='edit'
-                                onClick={() => this.onToolEdit('tuning', m)}
-                              />
-                              <Button
-                                type='danger'
-                                shape='circle'
-                                icon='delete'
-                                onClick={() => this.onToolRemove('tuning', m.id)}
-                              />
-                            </>
-                          }
-                        >
-                          <Button
-                            type='primary'
-                            className={m.config ? 'config' : ''}
-                            onDoubleClick={() => this.onToolEdit('tuning', m)}
-                          >
-                            <Icon type={m.icon} />
-                            {m.name}
-                            {m.config ? <Icon type='check' /> : null}
-                          </Button>
-                        </Popover>
-                      </li>
-                    ))}
-                  </StyleModelList>
-                </Col>
-                <Col span={2} className='model-icon'>
-                  <Icon type='arrow-right' />
-                </Col>
-                <Col span={6} className='model-block'>
-                  <h4>Reject Model</h4>
-                  <StyleModelList>
-                    {activeTool.reject.map(m => (
-                      <li key={m.id}>
-                        <Popover
-                          placement='right'
-                          content={
-                            <>
-                              <Button
-                                type='primary'
-                                shape='circle'
-                                icon='edit'
-                                onClick={() => this.onToolEdit('reject', m)}
-                              />
-                              <Button
-                                type='danger'
-                                shape='circle'
-                                icon='delete'
-                                onClick={() => this.onToolRemove('reject', m.id)}
-                              />
-                            </>
-                          }
-                        >
-                          <Button
-                            type='primary'
-                            className={m.config ? 'config' : ''}
-                            onDoubleClick={() => this.onToolEdit('reject', m)}
-                          >
-                            <Icon type={m.icon} />
-                            {m.name}
-                            {m.config ? <Icon type='check' /> : null}
-                          </Button>
-                        </Popover>
-                      </li>
-                    ))}
-                  </StyleModelList>
-                </Col>
+                                className={tool.config ? 'config' : ''}
+                                onDoubleClick={() => this.onToolEdit(tool)}
+                              >
+                                <Icon type='edit' />
+                                {tool.toolName}
+                                {tool.config ? <Icon type='check' /> : null}
+                              </Button>
+                            </Popover>
+                          </li>
+                        ))}
+                      </StyleModelList>
+                    </Col>
+                  </React.Fragment>
+                ))}
               </Row>
               <div style={{ padding: '10px 0' }}>
                 <Link to='/config'>
@@ -702,7 +633,7 @@ class Builder extends React.Component {
         </StyleImagesModal>
 
         <Modal
-          title={'Model Config - ' + configTool}
+          title={`Model Config - ${configTool.toolName || ''}`}
           visible={configVisible}
           onOk={this.onConfigModalOk}
           onCancel={() => this.setState({ configVisible: false })}
@@ -713,32 +644,41 @@ class Builder extends React.Component {
             labelCol={{ span: 6 }}
             wrapperCol={{ span: 18 }}
           >
-            <Form.Item label='Zoom:'>
-              <Select
-                size='small'
-                placeholder='Step Id'
-                style={{ width: 120, marginLeft: 10 }}
-                onChange={group => this.setState({ group })}
-              >
-                {['aaa', 'bbb', 'ccc'].map(s => (
-                  <Select.Option value={s} key={s}>
-                    {s}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item label='Width:'>
-              <AutoComplete
-                allowClear
-                size='small'
-                filterOption={true}
-                dataSource={['2', '222', '221', '2333']}
-                style={{ width: 150 }}
-              />
-            </Form.Item>
-            <Form.Item label='Includes:'>
-              <Checkbox.Group options={ITEMS_LIST} />
-            </Form.Item>
+            {configTool.params.map(param => (
+              <Form.Item key={param.id} required={param.isRequired} label={`${param.paramName}:`}>
+                {param.dataType === 'string' ? (
+                  <>
+                    <Input
+                      onChange={e => this.onToolConfigParamsChange(param.id, 'STR', e.target.value)}
+                      defaultValue={param.valueDefault}
+                      size='small'
+                    />
+                  </>
+                ) : (
+                  <>
+                    <InputNumber
+                      onChange={v => this.onToolConfigParamsChange(param.id, 'NUM0', v)}
+                      min={param.lowerLimit}
+                      max={param.upperLimit}
+                      step={TOOL_CONFIG_STEP}
+                      defaultValue={param.lowerLimitDefault}
+                      size='small'
+                    />
+                    {param.paramType === 'SCOPE' ? (
+                      <InputNumber
+                        onChange={v => this.onToolConfigParamsChange(param.id, 'NUM1', v)}
+                        style={{ marginLeft: 20 }}
+                        min={param.lowerLimit}
+                        max={param.upperLimit}
+                        step={TOOL_CONFIG_STEP}
+                        defaultValue={param.upperLimitDefault}
+                        size='small'
+                      />
+                    ) : null}
+                  </>
+                )}
+              </Form.Item>
+            ))}
           </Form>
         </Modal>
 

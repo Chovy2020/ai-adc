@@ -2,99 +2,10 @@
 export const LAYOUT_SIZE = [3, 4, 5, 6]
 // 字体大小
 export const FONT_SIZE = ['12', '14', '16', '18']
+// 工具类型
+export const TOOL_STAGES = ['PRE', 'TUNING', 'REJECT']
 
-export const PRE_TREATMENT = [
-  {
-    icon: 'edit',
-    name: '编辑'
-  },
-  {
-    icon: 'copy',
-    name: '拷贝'
-  },
-  {
-    icon: 'delete',
-    name: '删除'
-  },
-  {
-    icon: 'snippets',
-    name: '切片'
-  },
-  {
-    icon: 'diff',
-    name: '比较'
-  },
-  {
-    icon: 'highlight',
-    name: '高亮'
-  }
-]
-
-export const MODEL_TUNING = [
-  {
-    icon: 'qq-circle',
-    name: 'qq-circle'
-  },
-  {
-    icon: 'rest',
-    name: 'rest'
-  },
-  {
-    icon: 'save',
-    name: 'save'
-  },
-  {
-    icon: 'setting',
-    name: 'setting'
-  },
-  {
-    icon: 'pushpin',
-    name: 'pushpin'
-  },
-  {
-    icon: 'sound',
-    name: 'sound'
-  },
-  {
-    icon: 'star',
-    name: 'star'
-  }
-]
-
-export const REJECT_MODEL = [
-  {
-    icon: 'step-backward',
-    name: 'step-backward'
-  },
-  {
-    icon: 'step-forward',
-    name: 'step-forward'
-  },
-  {
-    icon: 'fast-backward',
-    name: 'fast-backward'
-  },
-  {
-    icon: 'fast-forward',
-    name: 'fast-forward'
-  },
-  {
-    icon: 'up-square',
-    name: 'up-square'
-  },
-  {
-    icon: 'down-square',
-    name: 'down-square'
-  },
-  {
-    icon: 'left-square',
-    name: 'left-square'
-  },
-  {
-    icon: 'right-square',
-    name: 'right-square'
-  }
-]
+export const TOOL_CONFIG_STEP = 0.1
 
 export const LIBRARY = [
   {
