@@ -1,17 +1,28 @@
 /* eslint-disable */
 import React from 'react'
-// import _ from 'lodash'
-// import LazyLoad from 'react-lazyload'
 import { connect } from 'react-redux'
 import { Form, Button, Input, Select, Modal, Breadcrumb, message } from 'antd'
-// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import Folder from '@/assets/images/folder.png'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
 import { MODAL_MODES, GALLERY_IMAGES } from './constant'
-import { libraryUpdate, addImage, getGroups, getProducts, getSteps, showLibrary, getDefectGroups, insertLibrary, getDefectSteps, getDefectProducts, getDefectManualBin, getDefectImagesList } from './service'
+import {
+  delLibraryImage,
+  libraryUpdate,
+  addImage,
+  getGroups,
+  getProducts, 
+  getSteps, 
+  showLibrary, 
+  getDefectGroups, 
+  insertLibrary, 
+  getDefectSteps, 
+  getDefectProducts, 
+  getDefectManualBin, 
+  getDefectImagesList
+} from './service'
 import {
   StyleLibrary,
   StyleChoose,
@@ -22,12 +33,11 @@ import {
   StyleImagesModal,
   StyleCodeDescription
 } from './style'
-
+const baseImageUrl = 'https://images-bucket.s3.cn-northwest-1.amazonaws.com.cn'
 class Library extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      baseImageUrl: 'https://images-bucket.s3.cn-northwest-1.amazonaws.com.cn',
       products: [],
       steps: [],
       groups: [],
@@ -188,12 +198,15 @@ class Library extends React.Component {
       message.warning('Please select images first')
       return
     }
+    console.log(selected)
     this.props.changeToolboxLoading(true)
-    await delay(500)
+    await delLibraryImage({
+      defectIds: selected.toString()
+    })
     this.props.changeToolboxLoading(false)
-    const { library } = this.state
-    library[0].images.splice(0, 1)
-    this.setState({ library })
+    // const { library } = this.state
+    // library[0].images.splice(0, 1)
+    // this.setState({ library })
   }
   // - - - - - - - - - - - - - - - - - - Gallery Images - - - - - - - - - - - - - - - - - -
   // 添加图片到library
@@ -320,7 +333,7 @@ class Library extends React.Component {
   }
 
   render() {
-    const { groups, steps, products, visible, createLib, editCode, selected, modalMode, baseImageUrl, galleryImages, librarys } = this.state
+    const { groups, steps, products, visible, createLib, editCode, selected, modalMode, galleryImages, librarys } = this.state
     const { galleryVisible, gallerySelected, galleryRouter } = this.state
 
     return (

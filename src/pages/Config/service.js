@@ -3,7 +3,7 @@ import { post, get, put, del } from '@/utils/api'
 /**
  * 获取 group 列表
  */
-export const getGroups = () => post('adc-group/list')
+export const getGroups = (keyWord) => get(`adc-group/find/list/${keyWord}`)
 
 /**
  * 获取 classCodes

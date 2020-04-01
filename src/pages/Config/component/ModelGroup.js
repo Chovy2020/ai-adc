@@ -1,7 +1,9 @@
 import React from 'react'
 import _ from 'lodash'
 import { Button, Form, Input, Table, message, Modal, AutoComplete, Select, List } from 'antd'
-import { getGroups, getClassCodes, getHotkeys, updateGroup, updateHotkeyList, addGroup, deleteGroup } from '../service'
+// import { delay } from '@/utils/web'
+// import { SYSTEM_MODULES, ROLES } from './constant'
+import { getGroups, getClassCodes, getHotkeys, updateGroup, updateHotkeyList,addGroup, deleteGroup } from '../service'
 import { StyleModelGroup, StyleHotkeys, StyleEditModal, StyleGroupFilter } from '../style'
 
 const EditableContext = React.createContext()
@@ -74,7 +76,8 @@ class ModelGroup extends React.Component {
       hotkey: '',
       hotkeyMapping: [],
       addVisible: false,
-      addGroupName: ''
+      addGroupName: '',
+      keyword:'all'
     }
   }
 
@@ -93,17 +96,22 @@ class ModelGroup extends React.Component {
   }
   // 获取Groups
   loadGroups = async () => {
-    const groups = await getGroups()
+    const {keyword} = this.state
+    const groups = await getGroups(keyword)
     for (const i in groups) {
       for (const j in groups[i].items) {
         groups[i].items[j].key = groups[i].items[j].id
       }
     }
-    this.setState({ groups })
+    this.setState({ groups:_.cloneDeep(groups) })
   }
 
-  onSearch = keyword => {
-    console.log('search keyword', keyword)
+  onSearch = async keyword => {
+    if(keyword === null || keyword === ''){
+      keyword = 'all'
+    }
+    await this.setState({keyword:_.cloneDeep(keyword)})
+    this.loadGroups()
   }
   onAddGroup = async () => {
     const { addGroupName } = this.state
@@ -113,10 +121,10 @@ class ModelGroup extends React.Component {
     }
     this.setState({ addVisible: false })
     // call api
-    const addData = {
-      groupName: addGroupName,
-      productId: '',
-      stepId: ''
+    const addData={
+      groupName:addGroupName,
+      productId:'',
+      stepId:''
     }
     await addGroup(addData)
     this.loadGroups()
@@ -158,8 +166,8 @@ class ModelGroup extends React.Component {
   // Group修改后，保存
   onGroupOk = async () => {
     this.setState({ groupVisible: false })
-    const { group } = this.state
-    await updateGroup(group.id, group)
+    const { group } =this.state
+    await updateGroup(group.id,group)
     message.success('Save successfully')
     this.loadGroups()
   }
@@ -167,6 +175,7 @@ class ModelGroup extends React.Component {
   handleInsert = () => {
     const { group } = this.state
     group.items.push({
+      id:null,
       key: `Temp-${new Date().getTime()}`,
       groupId: group.id,
       productId: 'Product Id',
@@ -191,9 +200,14 @@ class ModelGroup extends React.Component {
   handleSave = row => {
     const { group } = this.state
     for (const i in group.items) {
-      if (group.items[i].id === row.id) {
+      if (group.items[i].id !== null && group.items[i].id === row.id) {
         group.items[i] = row
         break
+      }else{
+        if(group.items[i].key !== null && group.items[i].key === row.key){
+          group.items[i] = row
+          break
+        }
       }
     }
     this.setState({ group })
@@ -202,22 +216,22 @@ class ModelGroup extends React.Component {
   // 添加或修改热键
   onAssignHotkey = () => {
     const { hotkeyMapping, hotkey, classCode } = this.state
-    const code = classCode.split('~')
-    let isAdd = true
-    if (hotkeyMapping.length > 0) {
-      for (const index in hotkeyMapping) {
-        if (hotkeyMapping[index].hotkey === hotkey) {
+    const code=classCode.split('~')
+    let isAdd=true
+    if(hotkeyMapping.length >0){
+      for(const index in hotkeyMapping){
+        if(hotkeyMapping[index].hotkey === hotkey ){
           isAdd = false
-          hotkeyMapping[index].manualCodeId = code[1]
-          hotkeyMapping[index].remark = code[0]
+          hotkeyMapping[index].manualCodeId=code[1]
+          hotkeyMapping[index].remark=code[0]
         }
       }
     }
-    if (isAdd) {
+    if(isAdd){
       hotkeyMapping.push({
-        hotkey: hotkey,
-        manualCodeId: code[1],
-        remark: code[0]
+        hotkey:hotkey,
+        manualCodeId:code[1],
+        remark:code[0]
       })
     }
     this.setState({ hotkeyMapping })
@@ -235,15 +249,15 @@ class ModelGroup extends React.Component {
   }
   // 保存热键
   onHotkeyOk = async () => {
-    this.setState({ visible: false })
-    const { hotkeyMapping, group } = this.state
-    console.log('map,group', hotkeyMapping, group)
-    for (const index in hotkeyMapping) {
-      hotkeyMapping[index].remark = null
+    this.setState({ visible: false})
+    const {hotkeyMapping,group}=this.state
+    console.log("map,group",hotkeyMapping,group)
+    for(const index in hotkeyMapping){
+      hotkeyMapping[index].remark=null;
     }
-    const updateData = {
-      groupId: group.id,
-      hotkeys: hotkeyMapping
+    const updateData={
+      groupId:group.id,
+      hotkeys:hotkeyMapping
     }
     await updateHotkeyList(updateData)
     message.success('Hotkeys save successfully')
@@ -269,7 +283,7 @@ class ModelGroup extends React.Component {
         title: 'Product Id & Step Id',
         render: (text, record) => (
           <p>{record.items.map((item, index) => `${index > 0 ? ', ' : ''}${item.productId}-${item.stepId}`)}</p>
-        ),
+         ),
         width: '70%'
       },
       {
@@ -358,9 +372,7 @@ class ModelGroup extends React.Component {
               onSelect={classCode => this.setState({ classCode })}
             >
               {classCodes.map(code => (
-                <AutoComplete.Option key={code.id} value={code.manualName + '~' + code.id}>
-                  {code.manualName}
-                </AutoComplete.Option>
+                <AutoComplete.Option key={code.id} value={code.manualCode+code.manualName +"~"+ code.id}>{`${code.manualCode} - ${code.manualName}`}</AutoComplete.Option>
               ))}
             </AutoComplete>
             <Button type='primary' size='small' onClick={this.onAssignHotkey} style={{ marginLeft: 10 }}>
@@ -412,10 +424,7 @@ class ModelGroup extends React.Component {
           onCancel={() => this.setState({ addVisible: false })}
         >
           <span>Group Name:</span>
-          <Input
-            style={{ width: 370, marginLeft: 10 }}
-            onChange={e => this.setState({ addGroupName: e.target.value })}
-          />
+          <Input style={{ width: 370, marginLeft: 10 }} onChange={e => this.setState({ addGroupName: e.target.value })} />
         </Modal>
       </StyleModelGroup>
     )

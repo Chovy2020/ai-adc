@@ -6,6 +6,7 @@ export const getProducts = (groupId) => get(`defect/library/params/product/list/
 export const getSteps = (groupId, productId) => get(`defect/library/params/step/list/${groupId}/${productId}`)
 export const showLibrary = (data) => post('defect/library/show', data)
 export const libraryUpdate = (data) => post('defect/library/update', data)
+export const delLibraryImage = (data) => post('defect/library/image/delete', data)
 // get defect products, steps, grounps
 export const getDefectGroups = () => get('defect/params/group/list')
 export const getDefectProducts = (groupId) => get(`defect/params/product/list/${groupId}`)

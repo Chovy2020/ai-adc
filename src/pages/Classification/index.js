@@ -10,8 +10,8 @@ import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import { reorder } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
-import { getClassCodes, getHotkeys } from '@/pages/Config/service'
-import { getItemsData, getImages, updateClassification } from './service'
+import { getClassCodes } from '@/pages/Config/service'
+import { getItemsData, getImages, updateClassification ,getHotkeys} from './service'
 import {
   LAYOUT_SIZE,
   FONT_SIZE,
@@ -81,14 +81,16 @@ class Classification extends React.Component {
     this.setState({ time })
   }
   search = async index => {
-    const { items, itemsSelected, itemsKeyword } = this.state
+    const { items, itemsSelected, itemsKeyword ,time} = this.state
     const params = {
       pageNo: 1,
       pageSize: 1000
     }
     const data = {
       keywords: itemsKeyword[index],
-      targetField: ITEMS_MAPPING[items[index]]
+      targetField: ITEMS_MAPPING[items[index]],
+      scanTimeBegin:time[0] || '1970-01-01',
+      scanTimeEnd:time[1] || '2020-12-31'
     }
     if (index > 0) {
       for (let i = 0; i < index; i++) {
@@ -181,18 +183,18 @@ class Classification extends React.Component {
     // 加载完图片，再加载热键
     const { items, itemsSelected } = this.state
     let hotkeyEnable = false
+    let groupName = null
     if (items.includes('Group Id')) {
       for (const i in items) {
         if (items[i] === 'Group Id' && itemsSelected[i].length === 1) {
           hotkeyEnable = true
+          groupName = itemsSelected[i][0] 
         }
       }
     }
     this.setState({ hotkeyEnable })
     if (hotkeyEnable) {
-      const groupId = '1242652024632422400'
-      // call api get hotkeys getHotkeys
-      const hotkeys = await getHotkeys(groupId)
+      const hotkeys = await getHotkeys(groupName)
       this.setState({ hotkeys })
       this.generateKeyMapAndHandlers()
     }

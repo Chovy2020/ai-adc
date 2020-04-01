@@ -1,4 +1,4 @@
-import { post } from '@/utils/api'
+import { post,get } from '@/utils/api'
 
 // DataQuery: itemsData
 export const getItemsData = ({ pageNo, pageSize, data }) =>
@@ -16,4 +16,4 @@ export const getClassifyCodes = () => post('classify/type/list')
 export const updateClassification = data => post('manual/classify/update/info', data)
 
 // Hotkeys: mappingList
-export const getHotkeys = data => post('manual/getHotkeys', data)
+export const getHotkeys = groupName => get(`adc-group/hotkey/list/group-name/${groupName}`)
