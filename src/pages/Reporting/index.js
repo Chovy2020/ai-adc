@@ -1,7 +1,7 @@
 import React from 'react'
 import echarts from 'echarts'
 import { connect } from 'react-redux'
-import { Row, Col, Button, Input, Checkbox, Select } from 'antd'
+import { Row, Col, Button, Input, Checkbox, Radio, Select } from 'antd'
 import { changeMenu } from '@/utils/action'
 import { delay } from '@/utils/web'
 import { LIBRARY } from '@/pages/Builder/constant'
@@ -23,9 +23,8 @@ class Reporting extends React.Component {
       overviewChart1: null,
       overviewChart2: null,
       // data range
-      lastLots: false,
+      viewBy: 'DAY',
       lots: '',
-      lastDays: false,
       days: '',
       models: [
         {
@@ -131,13 +130,23 @@ class Reporting extends React.Component {
           barWidth: '60%',
           itemStyle: {
             normal: {
-              color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
-                offset: 0,
-                color: 'rgba(39, 164, 73, 1)'
-              }, {
-                offset: 1,
-                color: 'rgba(39, 164, 73, .6)'
-              }], false)
+              color: new echarts.graphic.LinearGradient(
+                0,
+                1,
+                0,
+                0,
+                [
+                  {
+                    offset: 0,
+                    color: 'rgba(39, 164, 73, 1)'
+                  },
+                  {
+                    offset: 1,
+                    color: 'rgba(39, 164, 73, .6)'
+                  }
+                ],
+                false
+              )
             }
           }
         }
@@ -183,13 +192,23 @@ class Reporting extends React.Component {
           barWidth: '60%',
           itemStyle: {
             normal: {
-              color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
-                offset: 0,
-                color: 'rgba(56, 158, 236, 1)'
-              }, {
-                offset: 1,
-                color: 'rgba(56, 158, 236, .6)'
-              }], false)
+              color: new echarts.graphic.LinearGradient(
+                0,
+                1,
+                0,
+                0,
+                [
+                  {
+                    offset: 0,
+                    color: 'rgba(56, 158, 236, 1)'
+                  },
+                  {
+                    offset: 1,
+                    color: 'rgba(56, 158, 236, .6)'
+                  }
+                ],
+                false
+              )
             }
           }
         }
@@ -276,7 +295,7 @@ class Reporting extends React.Component {
   }
 
   render() {
-    const { models, model, monitors } = this.state
+    const { models, model, monitors, viewBy } = this.state
     const { overviewChart1, overviewChart2, visible, images } = this.state
     if (overviewChart1)
       overviewChart1.setOption({
@@ -381,22 +400,24 @@ class Reporting extends React.Component {
               Remove from Monitor
             </Button>
             <span style={{ marginLeft: 40 }}>Data Range:</span>
-            <Checkbox onChange={e => this.setState({ lastLots: e.target.checked })} style={{ marginLeft: 10 }} />
-            <span>Last</span>
-            <Input
-              onChange={e => this.setState({ lots: e.target.value })}
-              size='small'
-              style={{ width: 40, margin: '0 5px' }}
-            />
-            <span>Lots</span>
-            <Checkbox onChange={e => this.setState({ lastDays: e.target.checked })} style={{ marginLeft: 20 }} />
-            <span>Last</span>
-            <Input
-              onChange={e => this.setState({ days: e.target.value })}
-              size='small'
-              style={{ width: 40, margin: '0 5px' }}
-            />
-            <span>Days</span>
+            <Radio.Group defaultValue={viewBy} onChange={e => this.setState({ viewBy: e.target.value })}>
+              <Radio value='LOT' style={{ marginLeft: 10 }} />
+              <span>Last</span>
+              <Input
+                onChange={e => this.setState({ lots: e.target.value })}
+                size='small'
+                style={{ width: 40, margin: '0 5px' }}
+              />
+              <span>Lots</span>
+              <Radio value='DAY' style={{ marginLeft: 20 }} />
+              <span>Last</span>
+              <Input
+                onChange={e => this.setState({ days: e.target.value })}
+                size='small'
+                style={{ width: 40, margin: '0 5px' }}
+              />
+              <span>Days</span>
+            </Radio.Group>
             <Button type='primary' style={{ marginLeft: 10 }}>
               Search
             </Button>

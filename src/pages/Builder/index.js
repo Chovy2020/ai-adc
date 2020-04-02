@@ -35,7 +35,8 @@ import {
   StyleImages,
   StyleImagesModal,
   StyleModelContainer,
-  StyleModelList
+  StyleModelList,
+  StyleTool
 } from './style'
 
 class Builder extends React.Component {
@@ -443,7 +444,11 @@ class Builder extends React.Component {
                     {stage.tools.map(tool => (
                       <li key={tool.id}>
                         <Tooltip placement='topLeft' title={tool.toolName}>
-                          <Icon onClick={() => this.onToolAdd(stage.stageCode, tool)} theme='filled' type='edit' />
+                          <img
+                            onClick={() => this.onToolAdd(stage.stageCode, tool)}
+                            src={`${window.ICON_BASE_URL}${tool.toolCode}.png`}
+                            alt=''
+                          />
                         </Tooltip>
                       </li>
                     ))}
@@ -550,15 +555,22 @@ class Builder extends React.Component {
                                 </>
                               }
                             >
-                              <Button
+                              {/* <Button
                                 type='primary'
                                 className={tool.config ? 'config' : ''}
                                 onDoubleClick={() => this.onToolEdit(tool)}
                               >
-                                <Icon type='edit' />
+                                <img
+                                  src={`${window.ICON_BASE_URL}${tool.toolCode}.png`}
+                                  alt=''
+                                />
                                 {tool.toolName}
                                 {tool.config ? <Icon type='check' /> : null}
-                              </Button>
+                              </Button> */}
+                              <StyleTool>
+                                <img src={`${window.ICON_BASE_URL}${tool.toolCode}.png`} alt='' />
+                                <p>{tool.toolName}</p>
+                              </StyleTool>
                             </Popover>
                           </li>
                         ))}

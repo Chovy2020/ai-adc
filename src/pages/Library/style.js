@@ -8,17 +8,21 @@ export const StyleLibrary = styled.div`
 `
 
 export const StyleChoose = styled.div`
-  height: 80px;
+  height: 100px;
   padding: 10px;
   width: 100%;
   .ant-form-item {
     margin-bottom: 0;
   }
+  .ant-typography{
+    font-weight: 400;
+    color:rgba(74,74,74,1);
+  }
 `
 
 export const StyleContainer = styled.div`
   width: 100%;
-  height: calc(100vh - 130px);
+  height: calc(100vh - 200px);
   overflow-y: auto;
   .function {
     height: 100%;
@@ -29,6 +33,18 @@ export const StyleContainer = styled.div`
       margin: 10px 0;
     }
   }
+`
+export const StyleFooter = styled.div`
+  background:#fff;
+  box-shadow:0px 0px 8px 0px rgba(0,0,0,0.2);
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `
 
 export const StyleImagesGroup = styled.div`
@@ -62,7 +78,7 @@ export const StyleImages = styled.ul`
       padding: 2px;
     }
     &.selected img {
-      border-color: red;
+      border-color: #00CE68;
     }
     .wafer-info {
       position: absolute;

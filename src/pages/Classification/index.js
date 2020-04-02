@@ -1,6 +1,5 @@
 import React from 'react'
 import _ from 'lodash'
-import LazyLoad from 'react-lazyload'
 import { HotKeys } from 'react-hotkeys'
 import { connect } from 'react-redux'
 import hasPermission from '@/components/hasPermission'
@@ -11,7 +10,7 @@ import { reorder } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
 import { getClassCodes } from '@/pages/Config/service'
-import { getItemsData, getImages, updateClassification ,getHotkeys} from './service'
+import { getItemsData, getImages, updateClassification, getHotkeys, addImageDB } from './service'
 import {
   LAYOUT_SIZE,
   FONT_SIZE,
@@ -57,7 +56,8 @@ class Classification extends React.Component {
       viewFilter: [],
       viewGroup: 'MAN_BIN',
       // selected
-      images: [],
+      images: {},
+      visibleImages: {},
       selected: [],
       hotkeyEnable: false,
       hotkeys: [],
@@ -78,10 +78,12 @@ class Classification extends React.Component {
   }
   // 修改时间
   onDatePickerChange = (dates, time) => {
-    this.setState({ time })
+    this.setState({ time }, () => {
+      this.onItemsReset()
+    })
   }
   search = async index => {
-    const { items, itemsSelected, itemsKeyword ,time} = this.state
+    const { items, itemsSelected, itemsKeyword, time } = this.state
     const params = {
       pageNo: 1,
       pageSize: 1000
@@ -89,8 +91,8 @@ class Classification extends React.Component {
     const data = {
       keywords: itemsKeyword[index],
       targetField: ITEMS_MAPPING[items[index]],
-      scanTimeBegin:time[0] || '1970-01-01',
-      scanTimeEnd:time[1] || '2020-12-31'
+      scanTimeBegin: time[0] || '1970-01-01',
+      scanTimeEnd: time[1] || '2020-12-31'
     }
     if (index > 0) {
       for (let i = 0; i < index; i++) {
@@ -188,7 +190,7 @@ class Classification extends React.Component {
       for (const i in items) {
         if (items[i] === 'Group Id' && itemsSelected[i].length === 1) {
           hotkeyEnable = true
-          groupName = itemsSelected[i][0] 
+          groupName = itemsSelected[i][0]
         }
       }
     }
@@ -226,6 +228,10 @@ class Classification extends React.Component {
       return
     }
     if (code === null) {
+      if(classCode === null || classCode === ''){
+        message.warning('Please select manual code')
+        return
+      }
       const codes = classCode.split('-')
       code = codes[0]
     }
@@ -242,13 +248,28 @@ class Classification extends React.Component {
   onClassifiedReset = () => {
     this.setState({ selected: [] })
   }
-  onAddToLibrary = () => {
+  onAddToLibrary = async () => {
     const { selected } = this.state
     if (selected.length === 0) {
       message.warning('Please select images first')
       return
     }
+    // 拦截manual code 0
+    const { images } = this.state
+    const imagesCode0 = images['0']
+    if (imagesCode0 && imagesCode0.length > 0) {
+      for (const img of imagesCode0) {
+        if (selected.includes(img.waferDefectId)) {
+          message.warning('Exist unclassified images')
+          return
+        }
+      }
+    }
     //api 传 选择图片Ids
+    const data = {
+      refDefectIds: selected
+    }
+    await addImageDB(data)
     this.setState({ selected: [] })
     message.success('Add to library succeeded')
   }
@@ -271,9 +292,9 @@ class Classification extends React.Component {
       imageData.scanTimeEnd = time[1]
     }
     for (const index in items) {
-      for (const item in ITEMS_MAPPING_2) {
-        if (ITEMS_MAPPING_2[item][0] === items[index]) {
-          imageData[ITEMS_MAPPING_2[item][1]] = itemsSelected[index]
+      for (const key in ITEMS_MAPPING_2) {
+        if (key === items[index]) {
+          imageData[ITEMS_MAPPING_2[key]] = itemsSelected[index]
         }
       }
     }
@@ -292,6 +313,7 @@ class Classification extends React.Component {
         images[group].push({
           id: res[group][id].waferDefectId + '-' + count,
           waferDefectId: res[group][id].waferDefectId,
+          lotId: res[group][id].lotId,
           waferNo: res[group][id].waferNo,
           defectId: res[group][id].defectId,
           step: res[group][id].step,
@@ -324,6 +346,18 @@ class Classification extends React.Component {
   // 侧边栏 筛选
   onFilterSubmit = () => {
     this.loadImages()
+  }
+  onViewFilterChange = viewFilter => {
+    const { images } = this.state
+    const visibleImages = {}
+    for (const group in images) {
+      const visibleGroup = []
+      for (const img of images[group]) {
+        if (viewFilter.includes(img.manBin)) visibleGroup.push(img)
+      }
+      if (visibleGroup.length > 0) visibleImages[group] = visibleGroup
+    }
+    this.setState({ viewFilter, visibleImages })
   }
   // 生成热键、热键绑定事件
   generateKeyMapAndHandlers = () => {
@@ -508,12 +542,12 @@ class Classification extends React.Component {
                 <span style={{ margin: '0 5px 0 10px' }}>Hotkey:</span>
                 <Switch checked={hotkeyEnable} onChange={this.onHotkeyEnableChange} />
                 <AuthButton
-                  auth='adc:classification:add_to_library'
+                  auth='adc:classification:addLibrary'
                   size='small'
                   onClick={this.onAddToLibrary}
                   type='primary'
                 >
-                  Add to Library
+                  Add To Image DB
                 </AuthButton>
               </Form.Item>
             </Form>
@@ -537,9 +571,7 @@ class Classification extends React.Component {
                                 : 'none'
                           }}
                         >
-                          <LazyLoad height={200} offset={300} overflow={true}>
-                            <img src={`${window.BASE_URL}${img.url}`} alt='' />
-                          </LazyLoad>
+                          <img src={`${window.BASE_URL}${img.url}`} alt='' />
                           {showLabel ? (
                             <div className={`wafer-info font-size-${labelSize}`}>
                               <p>Lot ID: {img.lotId}</p>

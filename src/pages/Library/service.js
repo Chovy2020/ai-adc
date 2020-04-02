@@ -8,14 +8,15 @@ export const showLibrary = (data) => post('defect/library/show', data)
 export const libraryUpdate = (data) => post('defect/library/update', data)
 export const delLibraryImage = (data) => post('defect/library/image/delete', data)
 // get defect products, steps, grounps
-export const getDefectGroups = () => get('defect/params/group/list')
-export const getDefectProducts = (groupId) => get(`defect/params/product/list/${groupId}`)
-export const getDefectSteps = (groupId, productId) => get(`defect/params/step/list/${groupId}/${productId}`)
-export const getDefectManualBin = (groupId, productId, stepId) => get(`defect/params/manual-bin/list/${groupId}/${productId}/${stepId}`)
-export const getDefectImagesList = (groupId, productId, stepId, manualBin) => get(`defect/images/list/${groupId}/${productId}/${stepId}/${manualBin}`)
+export const getDefectGroups = () => get('image-db/params/group/list')
+export const getDefectProducts = (groupId) => get(`image-db/params/product/list/${groupId}`)
+export const getDefectSteps = (groupId, productId) => get(`image-db/params/step/list/${groupId}/${productId}`)
+export const getDefectManualBin = (groupId, productId, stepId) => get(`image-db/params/manual-bin/list/${groupId}/${productId}/${stepId}`)
+export const getDefectImagesList = (groupId, productId, stepId, manualBin) => get(`image-db/images/list/${groupId}/${productId}/${stepId}/${manualBin}`)
 export const addImage = (data) => post('defect/library/image/add', data)
 // add library
 export const insertLibrary = (data) => post('defect/library/insert', data)
+export const shareLibrary = (data) => post('defect/library/share', data)
 
 
 // /**

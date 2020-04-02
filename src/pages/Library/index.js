@@ -1,14 +1,15 @@
 /* eslint-disable */
 import React from 'react'
 import { connect } from 'react-redux'
-import { Form, Button, Input, Select, Modal, Breadcrumb, message } from 'antd'
+import { Form, Button, Input, Select, Modal, Breadcrumb, message, Typography } from 'antd'
+const { Title } = Typography
 import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import Folder from '@/assets/images/folder.png'
 import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 import reducer from './reducer'
-import { MODAL_MODES, GALLERY_IMAGES } from './constant'
 import {
+  shareLibrary,
   delLibraryImage,
   libraryUpdate,
   addImage,
@@ -27,6 +28,7 @@ import {
   StyleLibrary,
   StyleChoose,
   StyleContainer,
+  StyleFooter,
   StyleImagesGroup,
   StyleImages,
   StyleDefectInfo,
@@ -45,6 +47,7 @@ class Library extends React.Component {
       step: '',
       product: '',
       librarys: [],
+      // librarys: [{libraryId: '1245223690721996800', manualCode: '', manualCodeName: '', images: []}],  // 测试数据
       // create
       visible: false,
       createLib: {
@@ -54,6 +57,14 @@ class Library extends React.Component {
         group: '',
         product: '',
         step: ''
+      },
+      shareLib: {
+        groups: [],
+        products: [],
+        steps: [],
+        group: '',
+        step: '',
+        product: ''
       },
       // images
       library: [],
@@ -88,14 +99,15 @@ class Library extends React.Component {
   // 初始化
   async componentDidMount() {
     this.props.changeMenu('library')
-    let { createLib, galleryRouter } = this.state
+    let { createLib, shareLib, galleryRouter } = this.state
     let dg = await getDefectGroups()
-    createLib.groups = galleryRouter.group.list = JSON.parse(JSON.stringify(dg))
-    galleryRouter.group.list = JSON.parse(JSON.stringify(dg)).map(item => {return {id: item.group_id, name: item.group_name}})
+    let lg = await getGroups()
+    shareLib.groups = lg
+    createLib.groups = JSON.parse(JSON.stringify(dg))
+    galleryRouter.group.list = dg.map(item => {return {id: item.group_id, name: item.group_name}})
     this.setState({
-      galleryImages: GALLERY_IMAGES,
-      groups: await getGroups(),
-      createLib, galleryRouter
+      groups: lg,
+      createLib, galleryRouter, shareLib
     })
     // 获取 Product Id
     // this.onShowLibrary()
@@ -111,10 +123,10 @@ class Library extends React.Component {
       groupId: group,
     })
     this.props.changeToolboxLoading(false)
-    // library = LIBRARY.map(code => {
-    //   code.expand = false
-    //   return code
-    // })
+    if (!librarys || librarys.length <= 0) {
+      message.warning('not find library!')
+      return
+    }
     this.setState({ librarys })
   }
   onDefectInfoChange = (index, key, value) => {
@@ -135,15 +147,7 @@ class Library extends React.Component {
     message.success('Save successfully')
     this.setState({ editCode: '' })
   }
-  onImageSelect = id => {
-    let { selected } = this.state
-    if (selected.includes(id)) {
-      selected = selected.filter(s => s !== id)
-    } else {
-      selected.push(id)
-    }
-    this.setState({ selected })
-  }
+  
   getCodeImagesExample = (codeImages, expand) => {
     if (codeImages && !expand && codeImages.length > 4) {
       codeImages = codeImages.filter((c, i) => i < 4)
@@ -156,89 +160,120 @@ class Library extends React.Component {
     this.setState({ librarys })
   }
   // - - - - - - - - - - - - - - - - - - Create Library - - - - - - - - - - - - - - - - - -
-  // 创建library
+  // Create/Share Library
   onModalAddLibrary = async () => {
-    let { createLib } = this.state
+    let { createLib, shareLib, modalMode } = this.state
+    let data = modalMode === 'CREATE' ? createLib : shareLib
     let msg = []
-    if(!createLib.product) msg.push('Please select product ID')
-    if(!createLib.step) msg.push('Please select step ID')
-    if (!createLib.group) msg.push('Please select group ID')
+    if(!data.product) msg.push('Please select product ID')
+    if(!data.step) msg.push('Please select step ID')
+    if (!data.group) msg.push('Please select group ID')
     if (msg.length > 0) {
       message.error(msg.toString());
       return
     }
     this.setState({ visible: false })
     this.props.changeToolboxLoading(true)
-    let data = await insertLibrary({
-      productId: createLib.product,
-      stepId: createLib.step,
-      groupId: createLib.group
-    })
-    this.props.changeToolboxLoading(false)
-    message.success('Create successfully')
-    this.setState({
-      library: [{ "code": data.id }]
-    })
-  }
-
-  onCreateLibrary = () => {
-    this.setState({ modalMode: MODAL_MODES[0], visible: true })
-  }
-  onCreateLibraryInput = (key, value = '') => {
-    console.log('onCreateLibraryInput', key, value)
-  }
-  // - - - - - - - - - - - - - - - - - - Share Exist - - - - - - - - - - - - - - - - - -
-  onShareExist = () => {
-    this.setState({ modalMode: MODAL_MODES[1], visible: true })
-  }
-
-  onRemoveImages = async () => {
-    const { selected } = this.state
-    if (selected.length === 0) {
-      message.warning('Please select images first')
-      return
+    if (modalMode === 'CREATE') {
+      let res = await insertLibrary({
+        productId: data.product,
+        stepId: data.step,
+        groupId: data.group
+      })
+      this.props.changeToolboxLoading(false)
+      message.success('Create successfully')
+      this.setState({
+        group: res.groupId,
+        product: res.productId,
+        step: res.stepId,
+        librarys: [{libraryId: res.id, manualCode: '', manualCodeName: '', images: []}]
+      })
+    } else {
+      let res = await shareLibrary({
+        productId: data.product,
+        stepId: data.step,
+        groupId: data.group,
+        destLibraryId: this.state.librarys[0].libraryId
+      })
+      this.props.changeToolboxLoading(false)
+      message.success('shareExists success')
+      this.onShowLibrary()
     }
-    console.log(selected)
-    this.props.changeToolboxLoading(true)
-    await delLibraryImage({
-      defectIds: selected.toString()
-    })
-    this.props.changeToolboxLoading(false)
-    // const { library } = this.state
-    // library[0].images.splice(0, 1)
-    // this.setState({ library })
+    
   }
+  onOpLibrary = (t) => {
+    this.setState({ modalMode: t, visible: true })
+  }
+
+  
   // - - - - - - - - - - - - - - - - - - Gallery Images - - - - - - - - - - - - - - - - - -
   // 添加图片到library
   onGalleryModalOk = async () => {
+    let { gallerySelected } = this.state
     this.setState({ galleryVisible: false })
     this.props.changeToolboxLoading(true)
     await addImage({
       libraryId: this.state.librarys[0].libraryId,
-      refDefectIds: this.state.gallerySelected
+      defects: gallerySelected
     })
-    this.props.changeToolboxLoading(false)
-
-    // await delay(500)
-    // this.props.changeToolboxLoading(false)
-    // const { galleryRouter, gallerySelected, library } = this.state
-    // if (library.length === 0) return
-    // const images = IMAGES_LIBRARY[galleryRouter.group][galleryRouter.product][galleryRouter.mb]
-    // const selected = images.filter(img => gallerySelected.includes(img.id))
-    // library[0].images = [...library[0].images, ...selected]
-    // this.setState({ library })
-  }
-
-  // 图片选择
-  onGalleryImageSelect = id => {
-    let { gallerySelected } = this.state
-    if (gallerySelected.includes(id)) {
-      gallerySelected = gallerySelected.filter(s => s !== id)
-    } else {
-      gallerySelected.push(id)
-    }
+    gallerySelected = []
     this.setState({ gallerySelected })
+    message.success('Add Success!')
+    this.onShowLibrary()
+    this.props.changeToolboxLoading(false)
   }
+  // 删除library下的图片
+  onRemoveImages = async () => {
+    let { selected } = this.state
+    if (selected.length === 0) {
+      message.warning('Please select images first')
+      return
+    }
+    this.props.changeToolboxLoading(true)
+    await delLibraryImage({
+      libraryId: this.state.librarys[0].libraryId,
+      defects: selected
+    })
+    selected = []
+    this.setState({ selected })
+    this.onShowLibrary()
+    message.success('Remove Success!')
+    this.props.changeToolboxLoading(false)
+  }
+
+  // 根据图片refDefectId、defectPictureName、tiffFileName 判断唯一性
+  // t => 重复是否删除
+  getDefectImageSole = (a, b, t) => {
+    let res = false
+    a.map((item, ind) => {
+      if (
+        item.refDefectId === b.refDefectId
+        && item.defectPicName === b.defectPictureName
+        && item.tiffFileName === b.tiffFileName
+      ) {
+        res = true
+        t && a.splice(ind, 1)
+      }
+    })
+    return res
+  }
+  // ------ 图片选择 ------
+  // t => 'gallerySelected' 文件夹内图片
+  // t => 'selected' library内图片
+  onGalleryImageSelect = (img, t) => {
+    let data = this.state[t]
+    if (this.getDefectImageSole(data, img)) {
+      this.getDefectImageSole(data, img, true)
+    } else {
+      data.push({
+        refDefectId: img.refDefectId,
+        defectPicName: img.defectPictureName,
+        tiffFileName: img.tiffFileName
+      })
+    }
+    t === 'gallerySelected' ? this.setState({ gallerySelected: data }) : this.setState({ selected: data })
+  }
+  
   // 路径选择
   onGalleryRouterClick = i => {
     const { galleryRouter } = this.state
@@ -288,7 +323,7 @@ class Library extends React.Component {
 
   // Group，Product，Step ID 级联选择
   async selectControl(id, type) {
-    let { createLib } = this.state
+    let { createLib, shareLib } = this.state
     switch (type) {
       case 'group':
         this.setState({
@@ -326,23 +361,37 @@ class Library extends React.Component {
       case 'createLibStep':
         createLib.step = id
         break
+      case 'shareLibGroup':
+        shareLib.group = id
+        shareLib.products = await getProducts(id)
+        shareLib.product = ''
+        shareLib.steps = []
+        shareLib.step = ''
+        break
+      case 'shareLibProduct':
+        shareLib.product = id
+        shareLib.steps = await getSteps(shareLib.group, id)
+        shareLib.step = ''
+        break
+      case 'shareLibStep':
+        shareLib.step = id
+        break
       default:
         return
     }
-    this.setState({ createLib })
+    this.setState({ createLib, shareLib })
   }
 
   render() {
-    const { groups, steps, products, visible, createLib, editCode, selected, modalMode, galleryImages, librarys } = this.state
+    const { groups, steps, products, visible, createLib, shareLib, editCode, selected, modalMode, galleryImages, librarys } = this.state
     const { galleryVisible, gallerySelected, galleryRouter } = this.state
-
     return (
       <StyleLibrary>
         <StyleChoose>
+          <Title level={3}>Defect Library</Title>
           <Form layout='vertical'>
             <Form.Item>
               <Select
-                size='small'
                 placeholder='Group Id'
                 style={{ width: 120 }}
                 onChange={id => this.selectControl(id, 'group')}
@@ -354,7 +403,6 @@ class Library extends React.Component {
                 ))}
               </Select>
               <Select
-                size='small'
                 placeholder='Product Id'
                 style={{ width: 120, marginLeft: 10 }}
                 value={this.state.product || undefined}
@@ -367,7 +415,6 @@ class Library extends React.Component {
                 ))}
               </Select>
               <Select
-                size='small'
                 placeholder='Step Id'
                 style={{ width: 120, marginLeft: 10 }}
                 value={this.state.step || undefined}
@@ -379,40 +426,11 @@ class Library extends React.Component {
                   </Select.Option>
                 ))}
               </Select>
-              <Button style={{ width: 120, marginLeft: 10 }} size='small' type='primary' onClick={this.onShowLibrary}>
+              <Button style={{ width: 120, marginLeft: 10 }} type='primary' onClick={this.onShowLibrary.bind(this)}>
                 Show Library
               </Button>
-            </Form.Item>
-            <Form.Item>
-              <Button style={{ width: 120 }} size='small' type='primary' onClick={this.onCreateLibrary}>
+              <Button style={{ width: 120 }} type='primary' onClick={this.onOpLibrary.bind(this, 'CREATE')}>
                 Create Library
-              </Button>
-              <Button
-                size='small'
-                style={{ width: 120 }}
-                disabled={librarys.length <= 0}
-                type='primary'
-                onClick={this.onShareExist}
-              >
-                Share Exist
-              </Button>
-              <Button
-                style={{ width: 120 }}
-                size='small'
-                type='primary'
-                disabled={librarys.length <= 0}
-                onClick={() => this.setState({ galleryVisible: true })}
-              >
-                Add Images
-              </Button>
-              <Button
-                disabled={librarys.length <= 0}
-                style={{ width: 120 }}
-                size='small'
-                type='danger'
-                onClick={this.onRemoveImages}
-              >
-                Remove Images
               </Button>
             </Form.Item>
           </Form>
@@ -473,10 +491,10 @@ class Library extends React.Component {
                     {this.getCodeImagesExample(group.images, group.expand).map((img, index) => (
                       <li
                         key={index}
-                        className={selected.includes(img.defectRelId) ? 'selected' : ''}
-                        onClick={() => this.onImageSelect(img.defectRelId)}
+                        className={this.getDefectImageSole(selected, img) ? 'selected' : ''}
+                        onClick={() => this.onGalleryImageSelect(img, 'selected')}
                       >
-                        <img src={`${baseImageUrl}${img.url}`} alt='' />
+                        <img src={`${baseImageUrl}${img.defectPicPath}`} alt='' />
                       </li>
                     ))}
                     {!group.expand ? (
@@ -507,66 +525,144 @@ class Library extends React.Component {
             </StyleImagesGroup>
           ) : null}
         </StyleContainer>
+        <StyleFooter>
+          <Button
+            style={{ width: 120 }}
+            disabled={librarys.length <= 0}
+            type='primary'
+            onClick={this.onOpLibrary.bind(this, 'SHARE')}
+          >
+            Share Exist
+          </Button>
+          <Button
+            style={{ width: 120 }}
+            type='primary'
+            disabled={librarys.length <= 0}
+            onClick={() => this.setState({ galleryVisible: true })}
+          >
+            Add Images
+          </Button>
+          <Button
+            disabled={librarys.length <= 0}
+            type='danger'
+            onClick={this.onRemoveImages}
+          >
+            Remove Images
+          </Button>
+        </StyleFooter>
         {/* 创建Labrary */}
         <Modal
-          title={modalMode}
+          title={modalMode === 'CREATE' ? 'Create Library' : 'Share Exist'}
           visible={visible}
           onOk={this.onModalAddLibrary}
           onCancel={() => this.setState({ visible: false })}
         >
-          <Form
-            style={{ width: 400, margin: '0 auto' }}
-            layout='vertical'
-            labelCol={{ span: 6 }}
-            wrapperCol={{ span: 18 }}
-          >
-            <Form.Item label='Group:'>
-              <Select
-                size='small'
-                placeholder='Group Id'
-                style={{ width: 120 }}
-                onChange={id => this.selectControl(id, 'createLibGroup')}
+          {
+            modalMode === 'CREATE' ? (
+              <Form
+                style={{ width: 400, margin: '0 auto' }}
+                layout='vertical'
+                labelCol={{ span: 6 }}
+                wrapperCol={{ span: 18 }}
               >
-                {createLib.groups.map(s => (
-                  <Select.Option value={s.group_id} key={s.group_id}>
-                    {s.group_name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item label='Product:'>
-              <Select
-                size='small'
-                placeholder='Product Id'
-                style={{ width: 120 }}
-                value={this.state.createLib.product || undefined}
-                onChange={id => this.selectControl(id, 'createLibProduct')}
+                <Form.Item label='Group:'>
+                  <Select
+                    placeholder='Group Id'
+                    style={{ width: 120 }}
+                    value={createLib.group || undefined}
+                    onChange={id => this.selectControl(id, 'createLibGroup')}
+                  >
+                    {createLib.groups.map(s => (
+                      <Select.Option value={s.group_id} key={s.group_id}>
+                        {s.group_name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label='Product:'>
+                  <Select
+                    placeholder='Product Id'
+                    style={{ width: 120 }}
+                    value={createLib.product || undefined}
+                    onChange={id => this.selectControl(id, 'createLibProduct')}
+                  >
+                    {createLib.products.map(s => (
+                      <Select.Option value={s} key={s}>
+                        {s}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label='Step:'>
+                  <Select
+                    placeholder='Step Id'
+                    style={{ width: 120 }}
+                    value={createLib.step || undefined}
+                    onChange={id => this.selectControl(id, 'createLibStep')}
+                  >
+                    {createLib.steps.map(s => (
+                      <Select.Option value={s} key={s}>
+                        {s}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Form>
+            ) : (
+              <Form
+                style={{ width: 400, margin: '0 auto' }}
+                layout='vertical'
+                labelCol={{ span: 6 }}
+                wrapperCol={{ span: 18 }}
               >
-                {createLib.products.map(s => (
-                  <Select.Option value={s} key={s}>
-                    {s}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item label='Step:'>
-              <Select
-                size='small'
-                placeholder='Step Id'
-                style={{ width: 120 }}
-                value={this.state.createLib.step || undefined}
-                onChange={id => this.selectControl(id, 'createLibStep')}
-              >
-                {createLib.steps.map(s => (
-                  <Select.Option value={s} key={s}>
-                    {s}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Form>
+                <Form.Item label='Group:'>
+                  <Select
+                    placeholder='Group Id'
+                    style={{ width: 120 }}
+                    value={shareLib.group || undefined}
+                    onChange={id => this.selectControl(id, 'shareLibGroup')}
+                  >
+                    {shareLib.groups.map(s => (
+                      <Select.Option value={s.id} key={s.id}>
+                        {s.groupName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label='Product:'>
+                  <Select
+                    placeholder='Product Id'
+                    style={{ width: 120 }}
+                    value={shareLib.product || undefined}
+                    onChange={id => this.selectControl(id, 'shareLibProduct')}
+                  >
+                    {shareLib.products.map(s => (
+                      <Select.Option value={s} key={s}>
+                        {s}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label='Step:'>
+                  <Select
+                    placeholder='Step Id'
+                    style={{ width: 120 }}
+                    value={shareLib.step || undefined}
+                    onChange={id => this.selectControl(id, 'shareLibStep')}
+                  >
+                    {shareLib.steps.map(s => (
+                      <Select.Option value={s} key={s}>
+                        {s}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Form>
+            )
+          }
+          
         </Modal>
-
+        {/* 图片文件夹 */}
         <StyleImagesModal
           title='Images Library'
           visible={galleryVisible}
@@ -606,8 +702,8 @@ class Library extends React.Component {
               {galleryImages.map((img, ind) => (
                 <li
                   key={ind}
-                  className={gallerySelected.includes(img.refDefectId) ? 'selected' : ''}
-                  onClick={() => this.onGalleryImageSelect(img.refDefectId)}
+                  className={this.getDefectImageSole(gallerySelected, img) ? 'selected' : ''}
+                  onClick={() => this.onGalleryImageSelect(img, 'gallerySelected')}
                 >
                   <img src={`${baseImageUrl}${img.defectPicPath}`} alt='' />
                 </li>

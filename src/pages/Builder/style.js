@@ -26,14 +26,13 @@ export const StyleToolsGroup = styled.div`
     li {
       width: 33.33%;
       text-align: center;
-      padding: 5px 0;
-      .anticon {
-        font-size: 24px;
-        padding: 4px;
-        &:hover {
-          color: #1c92ed;
-          cursor: pointer;
-        }
+      padding: 10px 0;
+      img {
+        display: block;
+        width: 24px;
+        height: 24px;
+        margin: 0 auto;
+        cursor: pointer;
       }
     }
   }
@@ -133,7 +132,6 @@ export const StyleImages = styled.ul`
   }
 `
 
-
 export const StyleImagesModal = styled(Modal)`
   .ant-modal-body {
     padding: 20px;
@@ -152,7 +150,6 @@ export const StyleImagesModal = styled(Modal)`
     cursor: default;
   }
 `
-
 
 export const StyleModelContainer = styled.div`
   padding: 10px 0;
@@ -196,5 +193,17 @@ export const StyleModelList = styled.ul`
   button.config {
     background-color: green;
     border: none;
+  }
+`
+
+
+export const StyleTool = styled.div`
+  width: 60px;
+  height: 60px;
+  display: block;
+  border: 1px solid #ddd;
+  img {
+    width: 30px;
+    height: 30px;
   }
 `

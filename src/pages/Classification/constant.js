@@ -24,23 +24,23 @@ export const ITEMS_MAPPING = {
   'Scan Time/Date': 'SCAN_TM',
   'Inspect Equip Id': 'EQP_ID',
   'Recipe Id': 'RECIPE_ID',
-  'Test Id': 'TEST_NO',
+  'Test Id': 'TEST_ID',
   'Slot Id': 'SLOT_NUM',
   'Group Id': 'GROUP_ID'
 }
 // 拖拽框对应接口字段
-export const ITEMS_MAPPING_2 = [
-  ['Product Id', 'productIds'],
-  ['Step Id', 'stepIds'],
-  ['Lot Id', 'lotIds'],
-  ['Wafer Id', 'waferIds'],
-  ['Inspect Equip Id', 'inspectors'],
-  ['Recipe Id', 'recipeIds'],
-  ['Scan Time/Date', 'scanDates'],
-  ['Test Id', 'testIds'],
-  ['Slot Id', 'sLotIds'],
-  ['Group Id', 'groupIds']
-]
+export const ITEMS_MAPPING_2 = {
+  'Product Id': 'productIds',
+  'Step Id': 'stepIds',
+  'Lot Id': 'lotIds',
+  'Wafer Id': 'waferIds',
+  'Inspect Equip Id': 'inspectors',
+  'Recipe Id': 'recipeIds',
+  'Scan Time/Date': 'scanDates',
+  'Test Id': 'testIds',
+  'Slot Id': 'sLotIds',
+  'Group Id': 'groupIds'
+}
 // 分类列表
 export const CATEGORY_TYPES = [
   ['Manual Bin', 'MB'],

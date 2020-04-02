@@ -17,3 +17,6 @@ export const updateClassification = data => post('manual/classify/update/info', 
 
 // Hotkeys: mappingList
 export const getHotkeys = groupName => get(`adc-group/hotkey/list/group-name/${groupName}`)
+
+//add to imageDB
+export const addImageDB = (data) => post('image-db/add',data)
