@@ -110,7 +110,7 @@ export function get(url) {
 export function del(url, data) {
   return new Promise(resolve => {
     axios
-      .delete(url, data)
+      .delete(url, { data })
       .then(res => resolve(res))
       .catch(() => {})
   })

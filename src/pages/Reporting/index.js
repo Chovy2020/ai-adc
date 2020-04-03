@@ -1,8 +1,8 @@
 import React from 'react'
 import echarts from 'echarts'
 import { connect } from 'react-redux'
-import { Row, Col, Button, Input, Checkbox, Radio, Select } from 'antd'
-import { changeMenu } from '@/utils/action'
+import { Row, Col, Button, Input, Radio, Select } from 'antd'
+import { changeToolboxLoading, changeMenu } from '@/utils/action'
 import { delay } from '@/utils/web'
 import { LIBRARY } from '@/pages/Builder/constant'
 import { TABLE_DATA, PIE_COLORS } from './constant'
@@ -15,6 +15,7 @@ import {
   StyleImagesModal,
   StyleImages
 } from './style'
+import { countModelStatus, countProduct } from './service'
 
 class Reporting extends React.Component {
   constructor(props) {
@@ -47,12 +48,62 @@ class Reporting extends React.Component {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    let modelId = this.props.location.state ? this.props.location.state.modelId : null
+    if (modelId) {
+      console.log('modelId', modelId)
+    }
     this.props.changeMenu('reporting')
+    this.props.changeToolboxLoading(true)
     const overviewChart1 = echarts.init(document.getElementById('overview-chart-1'))
     const overviewChart2 = echarts.init(document.getElementById('overview-chart-2'))
-    this.setState({ overviewChart1, overviewChart2 })
+    overviewChart1.setOption(this.modelStatusConfig(await countModelStatus()))
+    overviewChart2.setOption(this.modelStatusConfig(await countProduct()))
+    this.setState({ overviewChart1, overviewChart2 }, () => {
+      this.props.changeToolboxLoading(false)
+    })
     this.renderMonitors()
+  }
+
+  // Overview Config
+  modelStatusConfig = data => {
+    data = data.map(item => {
+      return {
+        name: item.name || 'Other',
+        value: item.value
+      }
+    })
+    return {
+      color: PIE_COLORS,
+      tooltip: {
+        trigger: 'item',
+        formatter: '{b}: {c} ({d}%)'
+      },
+      legend: {
+        icon: 'circle',
+        position: 'center'
+      },
+      series: [
+        {
+          name: '',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          label: {
+            normal: {
+              show: false,
+              position: 'center'
+            }
+          },
+          labelLine: {
+            normal: {
+              show: false
+            }
+          },
+          data
+        }
+      ]
+    }
   }
 
   onModelSelect = model => {
@@ -296,86 +347,10 @@ class Reporting extends React.Component {
 
   render() {
     const { models, model, monitors, viewBy } = this.state
-    const { overviewChart1, overviewChart2, visible, images } = this.state
-    if (overviewChart1)
-      overviewChart1.setOption({
-        color: PIE_COLORS,
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
-        legend: {
-          icon: 'circle',
-          position: 'center',
-          data: ['Active', 'Pi-run', 'Disable']
-        },
-        series: [
-          {
-            name: '',
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            label: {
-              normal: {
-                show: false,
-                position: 'center'
-              }
-            },
-            labelLine: {
-              normal: {
-                show: false
-              }
-            },
-            data: [
-              { value: 50, name: 'Active' },
-              { value: 30, name: 'Pi-run' },
-              { value: 40, name: 'Disable' }
-            ]
-          }
-        ]
-      })
-
-    if (overviewChart2)
-      overviewChart2.setOption({
-        color: PIE_COLORS,
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
-        legend: {
-          icon: 'circle',
-          position: 'center',
-          data: ['Product A', 'Product B', 'Product C', 'Product D']
-        },
-        series: [
-          {
-            name: '',
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            label: {
-              normal: {
-                show: false,
-                position: 'center'
-              }
-            },
-            labelLine: {
-              normal: {
-                show: false
-              }
-            },
-            data: [
-              { value: 150, name: 'Product A' },
-              { value: 130, name: 'Product B' },
-              { value: 240, name: 'Product C' },
-              { value: 140, name: 'Product D' }
-            ]
-          }
-        ]
-      })
-
+    const { visible, images } = this.state
     return (
       <StyleReporting>
+        <h3 className='ant-typography'>Reporting</h3>
         <StyleOverview>
           <h3>Overview</h3>
           <Row>
@@ -494,5 +469,5 @@ class Reporting extends React.Component {
 }
 
 // injectReducer('Builder', reducer)
-const mapDispatchToProps = { changeMenu }
+const mapDispatchToProps = { changeMenu, changeToolboxLoading }
 export default connect(() => ({}), mapDispatchToProps)(Reporting)

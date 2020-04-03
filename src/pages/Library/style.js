@@ -170,8 +170,4 @@ export const StyleImagesModal = styled(Modal)`
     color: rgba(0, 0, 0, 0.65);
     cursor: default;
   }
-  .ant-breadcrumb-link-p {
-    color: #1890ff;
-    cursor: pointer;
-  }
 `

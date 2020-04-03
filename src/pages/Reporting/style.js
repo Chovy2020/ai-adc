@@ -3,17 +3,22 @@ import { Row, Modal } from 'antd'
 
 export const StyleReporting = styled.div`
   margin: 0;
-  padding: 10px;
+  padding: 15px;
   height: calc(100vh - 50px);
   overflow-y: auto;
+  .ant-typography{
+    font-weight: 400;
+    font-size: 24px;
+    color:rgba(74,74,74,1);
+  }
 `
 
 export const StyleOverview = styled.div`
   margin: 0;
   padding: 10px;
   height: 320px;
+  border-radius:2px;
   border:1px solid rgba(220,222,226,1);
-  border-radius: 2px;
 `
 
 export const StyleModelsMonitor = styled.div`

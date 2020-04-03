@@ -51,7 +51,7 @@ export const StyleImagesContainer = styled.div`
     color: #1890ff;
     cursor: pointer;
   }
-  .ant-breadcrumb span:last-child .ant-breadcrumb-link {
+  .ant-breadcrumb > span:last-child .ant-breadcrumb-link {
     color: rgba(0, 0, 0, 0.65);
     cursor: default;
   }
@@ -156,13 +156,13 @@ export const StyleModelContainer = styled.div`
   width: 100%;
   margin-top: 10px;
   .ant-row {
-    width: 80%;
+    width: 1200px;
   }
   .ant-col {
     text-align: center;
   }
   .model-icon {
-    height: 200px;
+    height: 230px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,7 +170,7 @@ export const StyleModelContainer = styled.div`
   }
   .model-block {
     border: 1px solid #ccc;
-    min-height: 200px;
+    min-height: 230px;
   }
   h4 {
     margin: 0;
@@ -179,31 +179,51 @@ export const StyleModelContainer = styled.div`
 `
 
 export const StyleModelList = styled.ul`
-  display: block;
+  display: flex;
   width: 100%;
-  padding: 10px;
   height: 100%;
-  li button {
-    text-align: left;
-    width: 180px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0 5px;
+`
+
+export const StyleTool = styled.div`
+  user-select: none;
+  padding: 5px 0 0;
+  width: 72px;
+  height: 80px;
+  display: block;
+  margin: 5px;
+  border: 1px solid #ddd;
+  position: relative;
+  cursor: pointer;
+  img {
+    width: 40px;
+    height: 40px;
+    margin: 4px auto 0;
   }
-  li + li {
-    margin-top: 10px;
+  p {
+    margin: 8px 0 0;
+    font-size: 12px;
   }
-  button.config {
-    background-color: green;
-    border: none;
+  .config {
+    position: absolute;
+    right: -1px;
+    top: -1px;
+    border-right: 15px solid green;
+    border-bottom: 15px solid transparent;
   }
 `
 
-
-export const StyleTool = styled.div`
-  width: 60px;
-  height: 60px;
-  display: block;
-  border: 1px solid #ddd;
-  img {
-    width: 30px;
-    height: 30px;
-  }
+export const StyleFooter = styled.div`
+  background: #fff;
+  box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `

@@ -24,7 +24,7 @@ export const ITEMS_MAPPING = {
   'Scan Time/Date': 'SCAN_TM',
   'Inspect Equip Id': 'EQP_ID',
   'Recipe Id': 'RECIPE_ID',
-  'Test Id': 'TEST_ID',
+  'Test Id': 'TEST_NO',
   'Slot Id': 'SLOT_NUM',
   'Group Id': 'GROUP_ID'
 }

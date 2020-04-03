@@ -25,7 +25,18 @@ import { delay } from '@/utils/web'
 import { injectReducer } from '@/utils/store'
 // import { getClassifyCodes } from '@/pages/Classification/service'
 import reducer from './reducer'
-import { getStages, getModels } from './service'
+import {
+  getStages,
+  getModels,
+  getModel,
+  getModelImages,
+  removeImagesFromModel,
+  getDefectGroups,
+  getDefectProducts,
+  getDefectSteps,
+  getDefectManualBin,
+  getDefectImagesList
+} from './service'
 import { LIBRARY, TOOL_STAGES, TOOL_CONFIG_STEP } from './constant'
 import { IMAGES_LIBRARY } from '@/pages/Library/constant'
 import {
@@ -36,7 +47,8 @@ import {
   StyleImagesModal,
   StyleModelContainer,
   StyleModelList,
-  StyleTool
+  StyleTool,
+  StyleFooter
 } from './style'
 
 class Builder extends React.Component {
@@ -44,31 +56,35 @@ class Builder extends React.Component {
     super(props)
     this.state = {
       stages: [],
-      models: [
-        {
-          id: 1,
-          name: 'Model_0308'
-        },
-        {
-          id: 2,
-          name: 'Model_0309'
-        }
-      ],
-      model: '',
-      createVisible: false,
-      createModalName: '',
+      models: [],
+      model: {},
+      modelName: '',
       // images
       modelMb: '',
       files: [],
       selected: [],
-      // image library
-      visible: false,
+      // add images
+      galleryVisible: false,
       galleryImages: [],
       gallerySelected: [],
       galleryRouter: {
-        group: '',
-        product: '',
-        mb: ''
+        curr: 'group',
+        group: {
+          list: [],
+          index: null
+        },
+        product: {
+          list: [],
+          index: null
+        },
+        step: {
+          list: [],
+          index: null
+        },
+        manualBin: {
+          list: [],
+          index: null
+        }
       },
       // models
       activeTools: {
@@ -88,12 +104,32 @@ class Builder extends React.Component {
     this.loadFiles(true)
     this.setState({ library: LIBRARY })
     this.loadStages()
+    this.loadModels()
+    this.loadGalleryFolder()
     // this.setState({ classifyCodes: await getClassifyCodes() })
+  }
+  // 加载gallery目录
+  loadGalleryFolder = async () => {
+    const dg = await getDefectGroups()
+    const { galleryRouter } = this.state
+    galleryRouter.group.list = dg.map(item => {
+      return { id: item.group_id, name: item.group_name }
+    })
+    this.setState({ galleryRouter })
   }
   // 加载模型列表
   loadModels = async () => {
-    const models = await getModels()
-    console.log(models)
+    const res = await getModels()
+    const models = []
+    const templates = []
+    for (const index in res) {
+      if (res[index].isProductPlugin === 'Y') {
+        templates.push(res[index])
+      } else {
+        models.push(res[index])
+      }
+    }
+    this.setState({ models, templates })
   }
   // 加载左侧的模型工具
   loadStages = async () => {
@@ -102,162 +138,37 @@ class Builder extends React.Component {
   }
   loadFiles = async () => {
     this.setState({ files: [] })
+
     await delay(1)
-    const { modelMb } = this.state
+    const { modelMb, model } = this.state
     const isFolder = modelMb === ''
     let files = []
     if (isFolder) {
-      for (let i = 0; i < 5; i++) {
+      for (const index in model.manualBins) {
         files.push({
-          id: i,
-          name: 'MB-' + Math.floor(Math.random() * 279)
+          id: model.manualBins[index],
+          name: 'MB-' + model.manualBins[index]
         })
       }
     } else {
-      files = [
-        {
-          id: 1,
-          name: 'F0004-tif-25',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 2,
-          name: 'F0004-tif-26',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 3,
-          name: 'F0004-tif-23',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 4,
-          name: 'F0004-tif-24',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 5,
-          name: 'F0004-tif-1',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 6,
-          name: 'F0004-tif-2',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 11,
-          name: 'F0004-tif-25',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 12,
-          name: 'F0004-tif-26',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 13,
-          name: 'F0004-tif-23',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 14,
-          name: 'F0004-tif-24',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 15,
-          name: 'F0004-tif-1',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 16,
-          name: 'F0004-tif-2',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 21,
-          name: 'F0004-tif-25',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 22,
-          name: 'F0004-tif-26',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 23,
-          name: 'F0004-tif-23',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 24,
-          name: 'F0004-tif-24',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 25,
-          name: 'F0004-tif-1',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 26,
-          name: 'F0004-tif-2',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 123,
-          name: 'F0004-tif-23',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 124,
-          name: 'F0004-tif-24',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 125,
-          name: 'F0004-tif-1',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        },
-        {
-          id: 126,
-          name: 'F0004-tif-2',
-          url: '/defect_images/2020-03-24/F0012-03-05-20200325210419-tif-28.jpg'
-        }
-      ]
+      files = await getModelImages(model.id, modelMb)
     }
     this.setState({ files })
   }
   // Load Model
-  onModelChange = async modelName => {
+  onModelChange = async modelId => {
     // call api
+    const res = await getModel(modelId)
+    res.id = modelId
     this.props.changeToolboxLoading(true)
     await delay(500)
     this.props.changeToolboxLoading(false)
     this.setState({
-      model: modelName,
+      modelName: res.modelName,
+      model: res,
       modelMb: '',
       selected: []
     })
-    this.loadFiles(true)
-  }
-  // Load Template
-  onTemplateChange = () => {
-    this.setState({ createVisible: true })
-  }
-  onCreateModalOk = async () => {
-    this.setState({ createVisible: false })
-    this.props.changeToolboxLoading(true)
-    await delay(500)
-    this.props.changeToolboxLoading(false)
-    const { createModalName } = this.state
-    this.setState({
-      model: createModalName,
-      modelMb: '',
-      selected: []
-    })
-    // call api
     this.loadFiles(true)
   }
   // - - - - - - - - - - - - - - - - - - Images - - - - - - - - - - - - - - - - - -
@@ -283,13 +194,18 @@ class Builder extends React.Component {
     this.setState({ selected })
   }
   // 删除图片
-  onRemoveImages = () => {
-    const { selected } = this.state
+  onRemoveImages = async () => {
+    const { selected, model } = this.state
     if (selected.length === 0) {
       message.warning('Please select images first')
       return
     }
-    // call api
+    const data = {
+      modelId: model.id,
+      refDefectIds: selected
+    }
+    console.log('delet--', data)
+    await removeImagesFromModel(data)
     this.setState({ selected: [] })
     message.success('Remove completed')
   }
@@ -350,6 +266,7 @@ class Builder extends React.Component {
         // 通过唯一id确定，同类型的tool会重复
         if (activeTools[s][i].key === configTool.key) {
           activeTools[s][i] = _.cloneDeep(configTool)
+          activeTools[s][i].config = 1
           break
         }
       }
@@ -362,6 +279,11 @@ class Builder extends React.Component {
   onModelSaveAs = () => {
     // 弹出层 选择groupId和输入modelName
     this.setState({ createVisible: true })
+  }
+  onViewResult = () => {
+    const { history } = this.props
+    console.log(history)
+    history.push('/reporting', { modelId: 'abc123' })
   }
   // - - - - - - - - - - - - - - - - - - Gallery Images - - - - - - - - - - - - - - - - - -
   onGalleryImageSelect = id => {
@@ -383,32 +305,105 @@ class Builder extends React.Component {
     if (gallerySelected.length === 0) return
     console.log('gallerySelected', gallerySelected)
   }
+  // 路径选择
   onGalleryRouterClick = i => {
     const { galleryRouter } = this.state
-    if (i === 0) {
-      galleryRouter.group = ''
-      galleryRouter.product = ''
-      galleryRouter.mb = ''
-    } else if (i === 1) {
-      galleryRouter.product = ''
-      galleryRouter.mb = ''
-    } else if (i === 2) {
-      galleryRouter.mb = ''
+    galleryRouter.curr = i
+    if (i === 'step') {
+      galleryRouter.step.index = null
+    } else if (i === 'product') {
+      galleryRouter.product.index = null
+      galleryRouter.step.index = null
+    } else if (i === 'group') {
+      galleryRouter.group.index = null
+      galleryRouter.product.index = null
+      galleryRouter.step.index = null
     }
+    galleryRouter.manualBin.index = null
     this.setState({ galleryRouter })
   }
-  onGalleryFolderDbClick = folder => {
-    const { galleryRouter } = this.state
-    if (galleryRouter.mb !== '') {
-      message.error('error')
-    } else if (galleryRouter.product !== '') {
-      galleryRouter.mb = folder
-    } else if (galleryRouter.group !== '') {
-      galleryRouter.product = folder
-    } else {
-      galleryRouter.group = folder
+  // 打开文件夹
+  onGalleryFolderDbClick = async index => {
+    let { galleryRouter, galleryImages } = this.state
+    galleryRouter[galleryRouter.curr].index = index
+    if (galleryRouter.curr === 'group') {
+      let d = await getDefectProducts(galleryRouter.group.list[galleryRouter.group.index].id)
+      galleryRouter.product.list = d.map(item => {
+        return { id: item, name: item }
+      })
+      galleryRouter.product.index = null
+      galleryRouter.curr = 'product'
+    } else if (galleryRouter.curr === 'product') {
+      let d = await getDefectSteps(
+        galleryRouter.group.list[galleryRouter.group.index].id,
+        galleryRouter.product.list[galleryRouter.product.index].id
+      )
+      galleryRouter.step.list = d.map(item => {
+        return { id: item, name: item }
+      })
+      galleryRouter.step.index = null
+      galleryRouter.curr = 'step'
+    } else if (galleryRouter.curr === 'step') {
+      let d = await getDefectManualBin(
+        galleryRouter.group.list[galleryRouter.group.index].id,
+        galleryRouter.product.list[galleryRouter.product.index].id,
+        galleryRouter.step.list[galleryRouter.step.index].id
+      )
+      galleryRouter.manualBin.list = d.map(item => {
+        return { id: item, name: item }
+      })
+      galleryRouter.manualBin.index = null
+      galleryRouter.curr = 'manualBin'
+    } else if (galleryRouter.curr === 'manualBin') {
+      let d = await getDefectImagesList(
+        galleryRouter.group.list[galleryRouter.group.index].id,
+        galleryRouter.product.list[galleryRouter.product.index].id,
+        galleryRouter.step.list[galleryRouter.step.index].id,
+        galleryRouter.manualBin.list[galleryRouter.manualBin.index].id
+      )
+      galleryImages = d
+      galleryRouter.curr = 'images'
     }
-    this.setState({ galleryRouter })
+    this.setState({ galleryRouter, galleryImages })
+  }
+  // 根据图片refDefectId、defectPictureName、tiffFileName 判断唯一性
+  // t => 重复是否删除
+  getDefectImageSole = (a, b, t) => {
+    let res = false
+    a.forEach((item, ind) => {
+      if (
+        item.refDefectId === b.refDefectId &&
+        item.defectPicName === b.defectPictureName &&
+        item.tiffFileName === b.tiffFileName
+      ) {
+        res = true
+        t && a.splice(ind, 1)
+      }
+    })
+    return res
+  }
+  // ------ 图片选择 ------
+  // t => 'gallerySelected' 文件夹内图片
+  // t => 'selected' library内图片
+  onGalleryImageSelect = (img, t) => {
+    let data = this.state[t]
+    if (this.getDefectImageSole(data, img)) {
+      this.getDefectImageSole(data, img, true)
+    } else {
+      data.push({
+        refDefectId: img.refDefectId,
+        defectPicName: img.defectPictureName,
+        tiffFileName: img.tiffFileName
+      })
+    }
+    t === 'gallerySelected' ? this.setState({ gallerySelected: data }) : this.setState({ selected: data })
+  }
+  // 添加图片到Model
+  onGalleryModalOk = async () => {
+    const { gallerySelected } = this.state
+    this.setState({ galleryVisible: false })
+    console.log('gallerySelected', gallerySelected)
+    this.setState({ gallerySelected: [] })
   }
   getFolderList = () => {
     const { galleryRouter } = this.state
@@ -424,11 +419,11 @@ class Builder extends React.Component {
   }
 
   render() {
-    const { models, model, modelMb, files, selected, stages } = this.state
-    const { visible, gallerySelected, galleryRouter } = this.state
-    const folderList = this.getFolderList()
+    const { models, modelName, modelMb, files, selected, stages } = this.state
+    const { galleryVisible, galleryImages, gallerySelected, galleryRouter } = this.state
+    // const folderList = this.getFolderList()
 
-    const { activeTools, configVisible, configTool, createVisible } = this.state
+    const { activeTools, configVisible, configTool } = this.state
     const isFolder = modelMb === ''
 
     return (
@@ -460,10 +455,10 @@ class Builder extends React.Component {
           <Col span={21} style={{ padding: 10 }}>
             <Popover
               content={
-                <Select style={{ width: 120 }} defaultValue={model} onChange={this.onModelChange}>
+                <Select style={{ width: 120 }} defaultValue={modelName} onChange={this.onModelChange}>
                   {models.map(m => (
-                    <Select.Option key={m.id} value={m.name}>
-                      {m.name}
+                    <Select.Option key={m.id} value={m.id}>
+                      {m.modelName}
                     </Select.Option>
                   ))}
                 </Select>
@@ -471,22 +466,10 @@ class Builder extends React.Component {
             >
               <Button type='primary'>Load Model</Button>
             </Popover>
-            <Popover
-              content={
-                <Select style={{ width: 120 }} defaultValue={model} onChange={this.onTemplateChange}>
-                  {models.map(m => (
-                    <Select.Option key={m.id} value={m.id}>
-                      {m.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              }
-            >
-              <Button type='primary'>Load Template</Button>
-            </Popover>
-            <span style={{ marginLeft: 20 }}>{model}</span>
+
+            <span style={{ marginLeft: 20 }}>{modelName}</span>
             <StyleImagesContainer>
-              <Button size='small' onClick={() => this.setState({ visible: true })}>
+              <Button size='small' onClick={() => this.setState({ galleryVisible: true })}>
                 Add Image
               </Button>
               <Button size='small' type='danger' onClick={this.onRemoveImages}>
@@ -500,7 +483,7 @@ class Builder extends React.Component {
                 {isFolder ? (
                   <>
                     {files.map(folder => (
-                      <li key={folder.id} onDoubleClick={() => this.onFolderDbClick(folder.name)}>
+                      <li key={folder.id} onDoubleClick={() => this.onFolderDbClick(folder.id)}>
                         <img src={Folder} alt='' />
                         <p>{folder.name}</p>
                       </li>
@@ -508,11 +491,11 @@ class Builder extends React.Component {
                   </>
                 ) : (
                   <>
-                    {files.map(img => (
+                    {files.map((img, index) => (
                       <li
-                        key={img.id}
-                        className={selected.includes(img.id) ? 'selected' : ''}
-                        onClick={() => this.onImageSelect(img.id)}
+                        key={index}
+                        className={selected.includes(img.refDefectId) ? 'selected' : ''}
+                        onClick={() => this.onImageSelect(img.refDefectId)}
                       >
                         <img src={isFolder ? Folder : `${window.BASE_URL}${img.url}`} alt='' />
                       </li>
@@ -527,11 +510,11 @@ class Builder extends React.Component {
                 {TOOL_STAGES.map((stage, index) => (
                   <React.Fragment key={stage}>
                     {index > 0 ? (
-                      <Col span={2} className='model-icon'>
+                      <Col span={1} className='model-icon'>
                         <Icon type='arrow-right' />
                       </Col>
                     ) : null}
-                    <Col span={6} className='model-block'>
+                    <Col span={7} className='model-block'>
                       <h4>Pre-Treatment</h4>
                       <StyleModelList>
                         {activeTools[stage].map(tool => (
@@ -555,21 +538,10 @@ class Builder extends React.Component {
                                 </>
                               }
                             >
-                              {/* <Button
-                                type='primary'
-                                className={tool.config ? 'config' : ''}
-                                onDoubleClick={() => this.onToolEdit(tool)}
-                              >
-                                <img
-                                  src={`${window.ICON_BASE_URL}${tool.toolCode}.png`}
-                                  alt=''
-                                />
-                                {tool.toolName}
-                                {tool.config ? <Icon type='check' /> : null}
-                              </Button> */}
-                              <StyleTool>
+                              <StyleTool onDoubleClick={() => this.onToolEdit(tool)}>
                                 <img src={`${window.ICON_BASE_URL}${tool.toolCode}.png`} alt='' />
                                 <p>{tool.toolName}</p>
+                                {tool.config ? <span className='config'></span> : null}
                               </StyleTool>
                             </Popover>
                           </li>
@@ -579,65 +551,77 @@ class Builder extends React.Component {
                   </React.Fragment>
                 ))}
               </Row>
-              <div style={{ padding: '10px 0' }}>
-                <Link to='/config'>
-                  <Button type='primary'>Training</Button>
-                </Link>
-                <Link to='/reporting' style={{ margin: '0 10px' }}>
-                  <Button type='primary'>View Result</Button>
-                </Link>
-                <Button onClick={this.onModelSave} type='primary'>
-                  Save
-                </Button>
-                <Button onClick={this.onModelSaveAs} type='primary'>
-                  Save As
-                </Button>
-              </div>
             </StyleModelContainer>
           </Col>
         </Row>
 
+        {modelName !== '' ? (
+          <StyleFooter>
+            <Link to='/config'>
+              <Button type='primary'>Training</Button>
+            </Link>
+            <Link to='/reporting' style={{ margin: '0 10px' }}>
+              <Button type='primary'>View Result</Button>
+            </Link>
+            <Button type='primary' onClick={this.onViewResult}>
+              View Result
+            </Button>
+            <Button onClick={this.onModelSave} type='primary'>
+              Save
+            </Button>
+            <Button onClick={this.onModelSaveAs} type='primary'>
+              Save As
+            </Button>
+          </StyleFooter>
+        ) : null}
+
+        {/* 图片文件夹 */}
         <StyleImagesModal
           title='Images Library'
-          visible={visible}
+          visible={galleryVisible}
           width={1000}
           onOk={this.onGalleryModalOk}
-          onCancel={() => this.setState({ visible: false })}
+          onCancel={() => this.setState({ galleryVisible: false })}
         >
           <Breadcrumb separator='>'>
-            <Breadcrumb.Item onClick={() => this.onGalleryRouterClick(0)}>Home</Breadcrumb.Item>
-            {galleryRouter.group !== '' ? (
-              <>
-                <Breadcrumb.Item onClick={() => this.onGalleryRouterClick(1)}>{galleryRouter.group}</Breadcrumb.Item>
-                {galleryRouter.product ? (
-                  <>
-                    <Breadcrumb.Item onClick={() => this.onGalleryRouterClick(2)}>
-                      {galleryRouter.product}
-                    </Breadcrumb.Item>
-                    {galleryRouter.mb ? <Breadcrumb.Item>{galleryRouter.mb}</Breadcrumb.Item> : null}
-                  </>
-                ) : null}
-              </>
-            ) : null}
+            <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('group')}>Home</Breadcrumb.Item>
+            {galleryRouter.group.index !== null && (
+              <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('product')}>
+                {galleryRouter.group.list[galleryRouter.group.index].name}
+              </Breadcrumb.Item>
+            )}
+            {galleryRouter.product.index !== null && (
+              <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('step')}>
+                {galleryRouter.product.list[galleryRouter.product.index].name}
+              </Breadcrumb.Item>
+            )}
+            {galleryRouter.step.index !== null && (
+              <Breadcrumb.Item onClick={() => this.onGalleryRouterClick('manualBin')}>
+                {galleryRouter.step.list[galleryRouter.step.index].name}
+              </Breadcrumb.Item>
+            )}
+            {galleryRouter.manualBin.index !== null && (
+              <Breadcrumb.Item>{galleryRouter.manualBin.list[galleryRouter.manualBin.index].name}</Breadcrumb.Item>
+            )}
           </Breadcrumb>
-          {folderList ? (
+          {galleryRouter.curr !== 'images' ? (
             <StyleImages className='gallery'>
-              {folderList.map(folder => (
-                <li key={folder} onDoubleClick={() => this.onGalleryFolderDbClick(folder)}>
+              {galleryRouter[galleryRouter.curr].list.map((item, index) => (
+                <li key={item.id} onDoubleClick={() => this.onGalleryFolderDbClick(index)}>
                   <img src={Folder} alt='' />
-                  <p>{folder}</p>
+                  <p>{item.name}</p>
                 </li>
               ))}
             </StyleImages>
           ) : (
             <StyleImages className='gallery images'>
-              {IMAGES_LIBRARY[galleryRouter.group][galleryRouter.product][galleryRouter.mb].map((img, index) => (
+              {galleryImages.map((img, ind) => (
                 <li
-                  key={img.id}
-                  className={gallerySelected.includes(img.id) ? 'selected' : ''}
-                  onClick={() => this.onGalleryImageSelect(img.id)}
+                  key={ind}
+                  className={this.getDefectImageSole(gallerySelected, img) ? 'selected' : ''}
+                  onClick={() => this.onGalleryImageSelect(img, 'gallerySelected')}
                 >
-                  <img src={`${window.BASE_URL}${img.url}`} alt='' />
+                  <img src={`${window.BASE_URL}${img.defectPicPath}`} alt='' />
                 </li>
               ))}
             </StyleImages>
@@ -691,41 +675,6 @@ class Builder extends React.Component {
                 )}
               </Form.Item>
             ))}
-          </Form>
-        </Modal>
-
-        <Modal
-          title={'Create Model'}
-          visible={createVisible}
-          onOk={this.onCreateModalOk}
-          onCancel={() => this.setState({ createVisible: false })}
-        >
-          <Form
-            style={{ width: 400, margin: '0 auto' }}
-            layout='vertical'
-            labelCol={{ span: 6 }}
-            wrapperCol={{ span: 18 }}
-          >
-            <Form.Item label='Group Id:'>
-              <Select
-                size='small'
-                placeholder='Step Id'
-                style={{ width: 120, marginLeft: 10 }}
-                onChange={group => this.setState({ group })}
-              >
-                {['aaa', 'bbb', 'ccc'].map(s => (
-                  <Select.Option value={s} key={s}>
-                    {s}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item label='Model Name:'>
-              <Input
-                onChange={e => this.setState({ createModalName: e.target.value })}
-                placeholder='Please input model name'
-              />
-            </Form.Item>
           </Form>
         </Modal>
       </StyleBuilder>

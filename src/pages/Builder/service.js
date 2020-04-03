@@ -1,4 +1,4 @@
-import { get, post } from '@/utils/api'
+import { get, post, del } from '@/utils/api'
 /**
  * 工具列表
  */
@@ -6,7 +6,7 @@ export const getStages = () => get('adc-builder/stage/list')
 /**
  * 模型列表
  */
-export const getModels = () => get('adc-builder/stage/list')
+export const getModels = () => get('adc-model/list')
 /**
  * 获取模板 列表
  */
@@ -19,19 +19,14 @@ export const getTemplates = () => post('library/get_library')
  * }
  * @param {Number} id 模型Id
  */
-export const getModel = data => post('library/get_library', data)
+export const getModel = id => get(`adc-model/get/id/${id}`)
 /**
- * 获取模型 详情(有图片的MB列表, Tools列表)
+ * 获取模型 详情(有图片的MB列表)
  * @param {Number} id 模型Id
- * @param {Number} code
+ * * @param {String} code MB
  */
-export const getModelImages = data => post('library/get_library', data)
-/**
- * 获取模型 详情(MB对应的图片列表)
- * @param {Number} id 模型Id
- * @param {String} code MB
- */
-export const getImages = data => post('library/get_library', data)
+export const getModelImages = (id, code) => get(`adc-model/get/image/list/${id}/${code}`)
+
 /**
  * 获取groupId 列表
  */
@@ -67,8 +62,7 @@ export const addImagesToModel = data => post('library/get_library', data)
  * @param {Array} imageIds
  * @param {String} code
  */
-export const removeImagesFromModel = data => post('library/get_library', data)
-
+export const removeImagesFromModel = data => del('adc-model/image/remove', data)
 
 /**
  * 更新Model tools
@@ -80,3 +74,10 @@ export const updateModelTools = data => post('library/get_library', data)
  * 获取toolsList
  */
 export const getModelTools = data => post('library/get_library', data)
+
+// get defect products, steps, grounps
+export const getDefectGroups = () => get('image-db/params/group/list')
+export const getDefectProducts = (groupId) => get(`image-db/params/product/list/${groupId}`)
+export const getDefectSteps = (groupId, productId) => get(`image-db/params/step/list/${groupId}/${productId}`)
+export const getDefectManualBin = (groupId, productId, stepId) => get(`image-db/params/manual-bin/list/${groupId}/${productId}/${stepId}`)
+export const getDefectImagesList = (groupId, productId, stepId, manualBin) => get(`image-db/images/list/${groupId}/${productId}/${stepId}/${manualBin}`)
